@@ -87,3 +87,53 @@ plot_usmap(data = pv_margins_map, regions = "states", values = "win_margin") +
 # Saving the graph to figures.
 
 ggsave(path = "images", filename = "victory_margins_historical.png", height = 3, width = 8)
+
+battleground <- pvstate_df %>%
+  filter(
+    state == "Nevada" | state == "Colorado" | state == "Iowa" |
+      state == "Ohio" | state == "Florida" | state == "Virginia") %>% 
+  filter(year >= 2012)
+
+
+dem_battle <- battleground %>% 
+  select(state, year, D_pv2p) %>% 
+  pivot_wider(names_from = "year", values_from = "D_pv2p" ) %>% 
+  mutate(d_vs_2020 = `2012` * 0.25 + `2016` * 0.75) %>% 
+  mutate(vote_margin_2020 = d_vs_2020 - (100 - d_vs_2020),
+         vote_margin_2016 = `2016` - (100 - `2016`),
+         vote_margin_2012 = `2012` - (100 - `2012`)) %>% 
+  select(state, vote_margin_2020: vote_margin_2012) %>% 
+  pivot_longer(cols = c("vote_margin_2020" : "vote_margin_2012"), names_to = "year", values_to = "vote_margin")
+
+dem_battle$year=gsub("vote_margin_","", dem_battle$year)
+dem_battle$year = as.double(dem_battle$year)
+
+dem_battle %>% 
+  ggplot(aes(x=year, y=vote_margin, color=vote_margin)) + 
+  facet_wrap(. ~ state) + 
+  ## add plot elements
+  geom_hline(yintercept=0,color="gray") +
+  geom_line(size=2) + 
+  geom_point(size=5) +
+  ## specify scale colors
+  scale_colour_gradient(low = "red", high = "blue") +
+  scale_fill_gradient(low = "red", high = "blue") +
+  ## specify titles, labels
+  xlab("") +
+  ylab("Democrat Vote-Share Margin") + 
+  ggtitle("Predicting Swing States in 2020") +
+  ## switch position of x-axis and y-axis
+  coord_flip() +
+  ## make x-axis (year) run from top to bottom
+  scale_x_reverse(breaks=c(2012, 2016, 2020)) +
+  theme_minimal() + 
+  theme(panel.border    = element_blank(),
+        plot.title      = element_text(size = 20, hjust = 0.5, face="bold"), 
+        legend.position = "none",
+        axis.title      = element_text(size=18),
+        axis.text.x     = element_text(angle = 45, hjust = 1),
+        axis.text       = element_text(size = 18),
+        strip.text      = element_text(size = 18, face = "bold"))
+
+
+ggsave(path = "images", filename = "swing_state_margins.png", height = 3, width = 8)
