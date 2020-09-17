@@ -59,7 +59,7 @@ election and deserve increased attention.
 To generate these predictions I used a basic model based on the results of the past two elections:
 
 ```
-r Dem_vote_share_2020 <- (Dem_vote_share_2016 *.75) + (Dem_vote_share_2012 *.25)
+Dem_vote_share_2020 <- (Dem_vote_share_2016 *.75) + (Dem_vote_share_2012 *.25)
 Rep_vote_share_2020 <- (Rep_vote_share_2016 *.75) + (Rep_vote_share_2012 *.25)
 ```
 
