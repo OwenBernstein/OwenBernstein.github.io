@@ -4,12 +4,10 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+### The Project
 
-### More Information
-
-A place to include any other types of information that you'd like to include about yourself.
+This blog is an ongoing project for Government 1347: Election Analytics, a Harvard College course taught by Professor Ryan Enos. The blog will be updated every Sunday with new models, statistics, and predictions for the 2020 election. 
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[owenbernstein@college.harvard.edu](mailto:email@domain.com)
