@@ -4,6 +4,7 @@ library(tidyverse)
 library(ggplot2)
 library(usmap)
 library(ggthemes)
+library(ggrepel)
 
 # Reading in data.
 
@@ -57,8 +58,8 @@ swing_states$num_rep_w <- factor(swing_states$num_rep_w, levels = c("5", "4", "3
 plot_usmap(data = swing_states, regions = "states", values = "num_rep_w", labels = T) +
   scale_fill_manual(values = c("white", "red", "pink", "skyblue", "blue", "white"), name = "GOP Election Wins") +
   theme_void() +
-  labs(title = "Swing States from 2000 - 2016")
-
+  labs(title = "Swing States from 2000 - 2016") 
+  
 # Saving the graph to the figures folder. 
 
 ggsave(path = "images", filename = "swing_states_historical.png", height = 3, width = 8)
@@ -136,4 +137,4 @@ dem_battle %>%
         strip.text      = element_text(size = 18, face = "bold"))
 
 
-ggsave(path = "images", filename = "swing_state_margins.png", height = 10, width = 8)
+ggsave(path = "images", filename = "swing_state_margins.png", height = 15, width = 8)
