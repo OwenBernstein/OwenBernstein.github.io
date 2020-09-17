@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Sep. 13, 2020 - Introduction
+title: Introduction - Sep. 13, 2020
 description: An introductory post examining past elections and their closeness.
 ---
 
