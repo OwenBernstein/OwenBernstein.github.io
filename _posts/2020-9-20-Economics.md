@@ -1,7 +1,6 @@
 ---
 layout: post
-date: 2020-9-20
-title: Economics
+title: Sep. 20, 2020 - Economics
 ---
 
 Modeling the 2020 election using economic models of GDP and mobility.
