@@ -136,4 +136,4 @@ dem_battle %>%
         strip.text      = element_text(size = 18, face = "bold"))
 
 
-ggsave(path = "images", filename = "swing_state_margins.png", height = 3, width = 8)
+ggsave(path = "images", filename = "swing_state_margins.png", height = 10, width = 8)

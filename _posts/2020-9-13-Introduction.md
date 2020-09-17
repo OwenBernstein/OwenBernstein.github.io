@@ -52,7 +52,6 @@ Only a few states frequently swing from a majority voting for one party to the
 other. These battleground states are critical in determining the outcome of the
 election and deserve increased attention.
 
-## Predicting Swing States in 2020
 
 ![picture](../images/swing_state_margins.png)
 
