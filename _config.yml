@@ -6,7 +6,7 @@
 name: Owen Bernstein
 
 # Short bio or description (displayed in the header)
-description: Harvard College '23, concentrating in government on the data science track. 
+description: I am a Sophomore at Harvard College '23 studying government on the data science track.
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
 avatar: https://avatars0.githubusercontent.com/u/60484341?s=400&u=f2838ac703dc15d94d254d8bb4e85589865139aa&v=4
@@ -26,7 +26,7 @@ footer-links:
   linkedin:
   pinterest:
   rss: # just type anything here for a working RSS icon
-  twitter: jekyllrb
+  twitter:
   stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
   youtube: # channel/<your_long_string> or user/<user-name>
   googleplus: # anything in your profile username that comes after plus.google.com/
