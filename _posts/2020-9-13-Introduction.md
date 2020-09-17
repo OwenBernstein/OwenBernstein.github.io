@@ -4,9 +4,6 @@ date: 2020-9-13
 title: Introduction
 ---
 
-An exploration of past elections and their closeness. 
-
-
 As the contentious 2020 election looms nearer, countless Americans will begin to
 make their predictions for election night. In this blog I will discuss insights
 from previous elections as well as offer my own predictions for the 2020
