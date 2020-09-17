@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Sep. 13, 2020 - Introduction
+description: An introductory post examining past elections and their closeness.
 ---
 
 As the contentious 2020 election looms nearer, countless Americans will begin to
