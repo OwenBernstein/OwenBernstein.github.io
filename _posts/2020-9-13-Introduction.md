@@ -1,7 +1,6 @@
 ---
 layout: post
-date: 2020-9-13
-title: Introduction
+title: Sep. 13, 2020 - Introduction
 ---
 
 As the contentious 2020 election looms nearer, countless Americans will begin to
