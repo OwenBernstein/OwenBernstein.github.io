@@ -3,13 +3,13 @@
 #
 
 # Name of your site (displayed in the header)
-name: Your Name
+name: Owen Bernstein
 
 # Short bio or description (displayed in the header)
-description: Web Developer from Somewhere
+description: Harvard College '23, concentrating in government on the data science track. 
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
-avatar: https://raw.githubusercontent.com/barryclark/jekyll-now/master/images/jekyll-logo.png
+avatar: https://avatars0.githubusercontent.com/u/60484341?s=400&u=f2838ac703dc15d94d254d8bb4e85589865139aa&v=4
 
 #
 # Flags below are optional
@@ -18,10 +18,10 @@ avatar: https://raw.githubusercontent.com/barryclark/jekyll-now/master/images/je
 # Includes an icon in the footer for each username you enter
 footer-links:
   dribbble:
-  email:
+  email: owenbernstein@college.harvard.edu
   facebook:
   flickr:
-  github: barryclark/jekyll-now
+  github: https://github.com/OwenBernstein
   instagram:
   linkedin:
   pinterest:
