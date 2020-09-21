@@ -15,10 +15,8 @@ product (GDP) growth and real disposable income (RDI) growth.
 In order to use these economic variables as predictors, I will first examine how
 well these variables have correlated with voting in past elections.
 
-![picture](../images/gdp_model.png)
-![picture](../images/rdi_model.png)
-![picture](../images/unemployment_model.png)
-![picture](../images/inflation_model.png)
+![picture](../images/patchwork_1.png)
+![picture](../images/patchwork_2.png)
 
 Judging purely by the images, it appears that unemployment, RDI growth, and GDP
 growth all correlate with the incumbent party's vote share. However, we can
