@@ -133,3 +133,4 @@ models_gt <- gt(stats) %>%
              decimals = 2)
   
 gtsave(data = models_gt, path = "images", filename = "model_gt.png")
+
