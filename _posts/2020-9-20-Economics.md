@@ -19,3 +19,7 @@ well these variables have correlated with voting in past elections.
 ![picture](../images/rdi_model.png)
 ![picture](../images/unemployment_model.png)
 ![picture](../images/inflation_model.png)
+
+Judging purely by the images, it appears that unemployment, RDI growth, and GDP growth all correlate with the incumbent party's vote share. However, we can actually quantitatively measure how well each of these models fits the data. The first measure to do this is the r squared statistic which measures the proportion of the dependent variable's variance that can be explained by the independent variable. The second measure is the mean squared error, which is less intuitively understood, but can be used to compare fitness across models. 
+
+![picture](../images/model_gt.png)
