@@ -10,7 +10,7 @@ Healy and Gabriel S. Lenz in "Substituting the End for the Whole: Why Voters
 Respond Primarily to the Election-Year Economy", is based on a theory of
 **retrospective voting behavior**. This theory argues that voters consider the past
 performance of the incumbent party through variables such as **gross domestic
-product (GDP)** growth and **real disposable income** (RDI) growth.
+product (GDP)** growth and **real disposable income (RDI)** growth.
 
 In order to use these economic variables as predictors, I will first examine how
 well these variables have correlated with voting in past elections.
