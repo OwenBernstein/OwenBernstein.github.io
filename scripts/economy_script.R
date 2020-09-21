@@ -5,6 +5,7 @@ library(ggplot2)
 library(ggthemes)
 library(broom)
 library(gt)
+library(patchwork)
 library(webshot)
 
 # Loading data
@@ -42,6 +43,7 @@ gdp_model <- dat %>%
   geom_vline(xintercept=0.01, lty=2) + # median
   xlab("Average 2nd and 3rd Quarter GDP Growth") +
   ylab("Incumbent Party's Two-Party Vote Share") +
+  labs(title = "GDP Growth Model") +
   theme_minimal()
 
 ggsave(path = "images", filename = "gdp_model.png", height = 4, width = 8)
@@ -55,6 +57,7 @@ rdi_model <- dat %>%
   geom_vline(xintercept=0.01, lty=2) + # median
   xlab("Average 2nd and 3rd Quarter RDI Growth") +
   ylab("Incumbent Party's Two-Party Vote Share") +
+  labs(title = "RDI Growth Model") +
   theme_minimal()
 
 ggsave(path = "images", filename = "rdi_model.png", height = 4, width = 8)
@@ -68,6 +71,7 @@ unemployment_model <- dat %>%
   geom_vline(xintercept=0.01, lty=2) + # median
   xlab("Average 2nd and 3rd Quarter Unemployment") +
   ylab("Incumbent Party's Two-Party Vote Share") +
+  labs(title = "Unemployment Model") +
   theme_minimal()
 
 ggsave(path = "images", filename = "unemployment_model.png", height = 4, width = 8)
@@ -81,12 +85,20 @@ inflation_model <- dat %>%
   geom_vline(xintercept=0.01, lty=2) + # median
   xlab("Average 2nd and 3rd Quarter Inflation") +
   ylab("Incumbent Party's Two-Party Vote Share") +
+  labs(title = "Inflation Model") +
   theme_minimal()
 
 ggsave(path = "images", filename = "inflation_model.png", height = 4, width = 8)
 
-# Making models for each economic indicator
+# Using patchwork to combine plots
 
+x1 <- (gdp_model + rdi_model)
+x2 <- (unemployment_model + inflation_model)
+
+ggsave(path = "images", filename = "patchwork_1.png", height = 4, width = 8)
+ggsave(path = "images", filename = "patchwork_2.png", height = 4, width = 8)
+
+# Making models for each economic indicator
 
 lm_gdp <- lm(pv2p ~ avg_gdp, data = dat)
 lm_rdi <- lm(pv2p ~ avg_rdi, data = dat)
