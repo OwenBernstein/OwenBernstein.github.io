@@ -4,6 +4,8 @@ library(tidyverse)
 library(ggplot2)
 library(ggthemes)
 library(broom)
+library(gt)
+library(webshot)
 
 # Loading data
 
@@ -42,6 +44,8 @@ dat %>%
   ylab("Incumbent Party's Two-Party Vote Share") +
   theme_minimal()
 
+ggsave(path = "images", filename = "gdp_model.png", height = 4, width = 8)
+
 dat %>%
   ggplot(aes(x= avg_rdi, y= pv2p,
              label= year)) + 
@@ -52,6 +56,8 @@ dat %>%
   xlab("Average 2nd and 3rd Quarter RDI Growth") +
   ylab("Incumbent Party's Two-Party Vote Share") +
   theme_minimal()
+
+ggsave(path = "images", filename = "rdi_model.png", height = 4, width = 8)
 
 dat %>%
   ggplot(aes(x= avg_unemployment, y= pv2p,
@@ -64,6 +70,8 @@ dat %>%
   ylab("Incumbent Party's Two-Party Vote Share") +
   theme_minimal()
 
+ggsave(path = "images", filename = "unemployment_model.png", height = 4, width = 8)
+
 dat %>%
   ggplot(aes(x= avg_inflation, y= pv2p,
              label= year)) + 
@@ -75,6 +83,8 @@ dat %>%
   ylab("Incumbent Party's Two-Party Vote Share") +
   theme_minimal()
 
+ggsave(path = "images", filename = "inflation_model.png", height = 4, width = 8)
+
 # Making models for each economic indicator
 
 
@@ -83,11 +93,43 @@ lm_rdi <- lm(pv2p ~ avg_rdi, data = dat)
 lm_unemployment <- lm(pv2p ~ avg_unemployment, data = dat)
 lm_inflation <- lm(pv2p ~ avg_inflation, data = dat)
 
-summary(lm_gdp)
+# Converting models to summaries
 
-tidy(lm_gdp)
+sm_gdp <- summary(lm_gdp)
+sm_rdi <- summary(lm_rdi)
+sm_unemployment <- summary(lm_unemployment)
+sm_inflation <- summary(lm_inflation)
 
+# Converting all summaries into a data frame
 
+stats <- data.frame(
+  row.names = c("gdp", "rdi", "unemploment", "inflation"),
+  model = c("Average 2nd and 3rd Quarter GDP Growth",
+            "Average 2nd and 3rd Quarter RDI Growth",
+            "Average 2nd and 3rd Quarter Inflation",
+            "Average 2nd and 3rd Quarter Unemployment"),
+  r_squared = c(
+    sm_gdp$r.squared,
+    sm_rdi$r.squared,
+    sm_unemployment$r.squared,
+    sm_inflation$r.squared
+  ),
+  mse = c(
+    sqrt(mean(sm_gdp$residuals ^ 2)),
+    sqrt(mean(sm_rdi$residuals ^ 2)),
+    sqrt(mean(sm_unemployment$residuals ^ 2)),
+    sqrt(mean(sm_inflation$residuals ^ 2))
+  )
+)
 
+# Making a gt table of the model statistics
 
-
+models_gt <- gt(stats) %>% 
+  tab_header(title = "Economic Models for Predicting Elections") %>% 
+  cols_label(model = "Model",
+             r_squared = "R Squared",
+             mse = "MSE") %>% 
+  fmt_number(columns = 2:3,
+             decimals = 2)
+  
+gtsave(data = models_gt, path = "images", filename = "model_gt.png")
