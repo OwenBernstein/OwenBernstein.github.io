@@ -33,7 +33,7 @@ dat <- popvote %>%
 
 # Making scatterplots for gdp, rdi, unemployment, and inflation
 
-dat %>%
+gdp_model <- dat %>%
   ggplot(aes(x= avg_gdp, y= pv2p,
              label= year)) + 
   geom_text() +
@@ -46,7 +46,7 @@ dat %>%
 
 ggsave(path = "images", filename = "gdp_model.png", height = 4, width = 8)
 
-dat %>%
+rdi_model <- dat %>%
   ggplot(aes(x= avg_rdi, y= pv2p,
              label= year)) + 
   geom_text() +
@@ -59,7 +59,7 @@ dat %>%
 
 ggsave(path = "images", filename = "rdi_model.png", height = 4, width = 8)
 
-dat %>%
+unemployment_model <- dat %>%
   ggplot(aes(x= avg_unemployment, y= pv2p,
              label= year)) + 
   geom_text() +
@@ -72,7 +72,7 @@ dat %>%
 
 ggsave(path = "images", filename = "unemployment_model.png", height = 4, width = 8)
 
-dat %>%
+inflation_model <- dat %>%
   ggplot(aes(x= avg_inflation, y= pv2p,
              label= year)) + 
   geom_text() +
@@ -133,4 +133,27 @@ models_gt <- gt(stats) %>%
              decimals = 2)
   
 gtsave(data = models_gt, path = "images", filename = "model_gt.png")
+
+new_gdp <- econ %>% 
+  filter(year == 2020 & quarter == 2) %>% 
+  mutate(avg_rdi = RDI_growth,
+         avg_gdp = GDP_growth_qt,
+         avg_unemployment = unemployment,
+         avg_inflation = inflation)
+
+predict_rdi <- data.frame(predict(lm_rdi, new_gdp, interval = "prediction"))
+predict_gdp <- data.frame(predict(lm_gdp, new_gdp, interval = "prediction"))
+predict_unemployment <- data.frame(predict(lm_unemployment, new_gdp, interval = "prediction"))
+predict_inflation <- data.frame(predict(lm_inflation, new_gdp, interval = "prediction"))
+
+models_predict <- bind_rows(list(predict_rdi, predict_gdp, predict_unemployment, predict_inflation), .id = "model") %>%
+  mutate(Model = c("RDI", "GDP", "Unemployment", "Inflation")) %>% 
+  select(Model, fit, lwr, upr) %>% 
+  gt() %>% 
+  tab_header(title = "2020 Two-Party Vote Share Prediction by Models") %>% 
+  cols_label(fit = "Prediction", lwr = "Lower Prediction Bound", upr = "Upper Prediction Bound") %>% 
+  fmt_number(columns = 2:4,
+           decimals = 2)
+
+gtsave(data = models_predict, path = "images", filename = "econ_model_predict_gt.png")
 
