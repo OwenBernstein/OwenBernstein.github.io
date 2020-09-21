@@ -15,7 +15,7 @@ product (GDP) growth and real disposable income (RDI) growth.
 In order to use these economic variables as predictors, I will first examine how
 well these variables have correlated with voting in past elections.
 
-![picture](../images/gdp.model.png)
-![picture](../images/rdi.model.png)
-![picture](../images/unemployment.model.png)
-![picture](../images/inflation.model.png)
+![picture](../images/gdp_model.png)
+![picture](../images/rdi_model.png)
+![picture](../images/unemployment_model.png)
+![picture](../images/inflation_model.png)
