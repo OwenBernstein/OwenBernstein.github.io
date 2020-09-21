@@ -134,6 +134,8 @@ models_gt <- gt(stats) %>%
   
 gtsave(data = models_gt, path = "images", filename = "model_gt.png")
 
+# Making a new data frame of 2020 economic values
+
 new_gdp <- econ %>% 
   filter(year == 2020 & quarter == 2) %>% 
   mutate(avg_rdi = RDI_growth,
@@ -141,10 +143,14 @@ new_gdp <- econ %>%
          avg_unemployment = unemployment,
          avg_inflation = inflation)
 
+# Predicting 2020 election outcomes with the models
+
 predict_rdi <- data.frame(predict(lm_rdi, new_gdp, interval = "prediction"))
 predict_gdp <- data.frame(predict(lm_gdp, new_gdp, interval = "prediction"))
 predict_unemployment <- data.frame(predict(lm_unemployment, new_gdp, interval = "prediction"))
 predict_inflation <- data.frame(predict(lm_inflation, new_gdp, interval = "prediction"))
+
+# Creating and saving a gt table of predictions
 
 models_predict <- bind_rows(list(predict_rdi, predict_gdp, predict_unemployment, predict_inflation), .id = "model") %>%
   mutate(Model = c("RDI", "GDP", "Unemployment", "Inflation")) %>% 
@@ -156,4 +162,3 @@ models_predict <- bind_rows(list(predict_rdi, predict_gdp, predict_unemployment,
            decimals = 2)
 
 gtsave(data = models_predict, path = "images", filename = "econ_model_predict_gt.png")
-
