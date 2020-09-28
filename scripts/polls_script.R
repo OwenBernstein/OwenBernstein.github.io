@@ -197,7 +197,7 @@ state_models_chl <- state_chl_coefs %>%
   ggplot(aes(r.squared)) +
   geom_histogram(fill = "steelblue") +
   geom_vline(data = state_chl_coefs, aes(xintercept = mean(r.squared), fill = "black")) +
-  annotate("text", x = .31, y = 4.5, label = "Average R-Squared\n of State Models",
+  annotate("text", x = .4, y = 4.8, label = "Average R-Squared\n of State Models",
            color = "black", size = 4) +
   theme_clean() +
   labs(title = "State Models for Challengers")+
@@ -209,7 +209,7 @@ state_models_inc <- state_inc_coefs %>%
   ggplot(aes(r.squared)) +
   geom_histogram(fill = "steelblue") +
   geom_vline(data = state_inc_coefs, aes(xintercept = mean(r.squared), fill = "black")) +
-  annotate("text", x = .425, y = 4.5, label = "Average R-Squared\n of State Models",
+  annotate("text", x = .58, y = 6, label = "Average R-Squared\n of State Models",
            color = "black", size = 4) +
   theme_clean() +
   labs(title = "State Models for Incumbent") +
