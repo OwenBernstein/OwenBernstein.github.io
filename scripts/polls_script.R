@@ -8,6 +8,8 @@ library(ggthemes)
 library(patchwork)
 library(gt)
 library(broom)
+library(caret)
+library(usmap)
 
 # Loading data
 
@@ -192,6 +194,7 @@ state_chl_coefs <- state_chl %>%
   unnest(model_sm) %>% 
   select(state, r.squared)
 
+# Plotting the r squared values of each of the state models in a histogram
 
 state_models_chl <- state_chl_coefs %>% 
   ggplot(aes(r.squared)) +
@@ -216,6 +219,131 @@ state_models_inc <- state_inc_coefs %>%
   xlab("R Squared Value") +
   ylab("")
 
+# Saving graph of state models evaluation
+
 state_models_plot <- state_models_chl + state_models_inc
 
 ggsave(path = "images", filename = "state_models_plot.png", height = 4, width = 8)
+
+# Creating a data frame of polls in the month period that I used for creating state models
+
+predict_polls <- polls_2020 %>% 
+  select(poll_id, state, answer, end_date, pct) %>% 
+  mutate(end_date = mdy(polls_2020$end_date)) %>% 
+  filter(end_date > ymd("2020-08-27") & end_date < ymd("2020-09-27")) %>% 
+  filter(answer == "Biden" | answer == "Trump") %>% 
+  group_by(state, answer) %>% 
+  summarise(avg_support = mean(pct)) %>% 
+  filter(!(state %in% c("", "District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3")))
+
+# Predicting Biden vote share in each state
+
+state_chl_prediction <- state_chl %>%
+  select(state, year, avg_support, pv) %>% 
+  filter(!(state %in% c("District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3"))) %>% 
+  na.omit( ) %>%
+  group_by(state) %>% 
+  nest() %>%
+  mutate(model = map(data, ~lm(pv ~ avg_support, data = .))) %>% 
+  select(state, model) %>% 
+  right_join(predict_polls) %>% 
+  filter(answer == "Biden") %>% 
+  filter(!(state %in% c("Maine CD-1", "Maine CD-2", "Nebraska CD-2")))
+
+# Making predicted Biden vote share into a data frame
+
+Biden_predict <- c(predict(
+  state_chl_prediction$model[3],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[3])
+),
+predict(
+  state_chl_prediction$model[4],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[4])
+),
+predict(
+  state_chl_prediction$model[8],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[8])
+),
+predict(
+  state_chl_prediction$model[17],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[17])
+),
+predict(
+  state_chl_prediction$model[22],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[22])
+),
+predict(
+  state_chl_prediction$model[30],
+  newdata = data.frame(avg_support = state_chl_prediction$avg_support[30])
+))
+   
+y <- unlist(Biden_predict, recursive=TRUE, use.names=TRUE)  
+
+biden_predict_df <- tibble(states, biden_prediction = y)
+biden_predict_df$states[1] <- "Colorado"
+biden_predict_df$states[2] <- "Florida"
+biden_predict_df$states[3] <- "Iowa"
+biden_predict_df$states[4] <- "Nevada"
+biden_predict_df$states[5] <- "Ohio"
+biden_predict_df$states[6] <- "Virginia"
+
+# Doing the same for incumbent
+
+state_inc_prediction <- state_inc %>%
+  select(state, year, avg_support, pv) %>% 
+  filter(!(state %in% c("District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3"))) %>% 
+  na.omit( ) %>%
+  group_by(state) %>% 
+  nest() %>%
+  mutate(model = map(data, ~lm(pv ~ avg_support, data = .))) %>% 
+  select(state, model) %>% 
+  right_join(predict_polls) %>% 
+  filter(answer == "Trump") %>% 
+  filter(!(state %in% c("Maine CD-1", "Maine CD-2", "Nebraska CD-2")))
+
+trump_predict <- c(predict(
+  state_inc_prediction$model[3],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[3])
+),
+predict(
+  state_inc_prediction$model[4],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[4])
+),
+predict(
+  state_inc_prediction$model[8],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[8])
+),
+predict(
+  state_inc_prediction$model[17],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[17])
+),
+predict(
+  state_inc_prediction$model[22],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[22])
+),
+predict(
+  state_inc_prediction$model[30],
+  newdata = data.frame(avg_support = state_inc_prediction$avg_support[30])
+))
+
+y <- unlist(trump_predict, recursive=TRUE, use.names=TRUE)  
+
+trump_predict_df <- tibble(states, trump_prediction = y)
+trump_predict_df$states[1] <- "Colorado"
+trump_predict_df$states[2] <- "Florida"
+trump_predict_df$states[3] <- "Iowa"
+trump_predict_df$states[4] <- "Nevada"
+trump_predict_df$states[5] <- "Ohio"
+trump_predict_df$states[6] <- "Virginia"
+
+# Merging prediction data frames and calculating winner
+
+win_margins <- trump_predict_df %>% 
+  full_join(biden_predict_df) %>% 
+  mutate(democrat_win_margin = biden_prediction - trump_prediction) %>% 
+  select(states, democrat_win_margin) %>% 
+  gt() %>% 
+  tab_header(title = "Predicting Swing States in 2020") %>% 
+  cols_label(states = "State", democrat_win_margin = "Democrat Win Margin")
+  
+gtsave(data = win_margins, path = "images", filename = "swing_states_win.png")
