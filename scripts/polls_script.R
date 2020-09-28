@@ -7,6 +7,7 @@ library(ggrepel)
 library(ggthemes)
 library(patchwork)
 library(gt)
+library(broom)
 
 # Loading data
 
@@ -39,9 +40,9 @@ challenger <- nat_time_dat %>%
 incumbent_plot <- incumbents %>% 
   ggplot(aes(x = avg_support, y = pv)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(method = lm, color = "steelblue") +
   geom_label_repel(label = incumbents$year, box.padding = 0.5) +
-  labs(title = "Incumbent Party Popular Vote Share by Polling Average") +
+  labs(title = "Incumbent Party") +
   xlab("Average Polling Support (6 - 10 Weeks Before Election)") +
   ylab("Popular Vote Share") +
   theme_clean()
@@ -49,9 +50,9 @@ incumbent_plot <- incumbents %>%
 challenger_plot <- challenger %>% 
   ggplot(aes(x = avg_support, y = pv)) +
   geom_point() +
-  geom_smooth(method = lm) +
+  geom_smooth(method = lm, color = "steelblue") +
   geom_label_repel(label = challenger$year, box.padding = 0.5) +
-  labs(title = "Challenger Party Popular Vote Share by Polling Average") +
+  labs(title = "Challenger Party") +
   xlab("Average Polling Support (6 - 10 Weeks Before Election)") +
   ylab("Popular Vote Share") +
   theme_clean()
@@ -159,14 +160,62 @@ colMeans(outsamp_df[4:5], na.rm=T) ### classification accuracy
 state_time_dat <- popvote_state %>% 
   full_join(avgpoll_time_state %>% 
               filter(weeks_left > 5 & weeks_left < 11) %>% 
-              group_by(year,party) %>% 
+              group_by(year,party, state) %>% 
               summarise(avg_support=mean(avg_poll))) %>% 
   left_join(popvote, by = c("year", "party"))
 
-# Making poll model
+# Making poll model for each state using map functions
 
 state_poll     <- state_time_dat[!is.na(state_time_dat$avg_support),]
 state_inc <- state_poll[state_poll$incumbent_party,]
 state_chl <- state_poll[!state_poll$incumbent_party,]
-state_mod_inc <- lm(pv ~ avg_support, data = state_inc)
-state_mod_chl <- lm(pv ~ avg_support, data = state_chl)
+
+state_inc_coefs <- state_inc %>%
+  select(state, year, avg_support, pv) %>% 
+  filter(!(state %in% c("District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3"))) %>% 
+  na.omit( ) %>%
+  group_by(state) %>% 
+  nest() %>%
+  mutate(model = map(data, ~lm(pv ~ avg_support, data = .))) %>%
+  mutate(model_sm = map(model, glance)) %>% 
+  unnest(model_sm) %>% 
+  select(state, r.squared)
+
+state_chl_coefs <- state_chl %>%
+  select(state, year, avg_support, pv) %>% 
+  filter(!(state %in% c("District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3"))) %>% 
+  na.omit( ) %>%
+  group_by(state) %>% 
+  nest() %>%
+  mutate(model = map(data, ~lm(pv ~ avg_support, data = .))) %>%
+  mutate(model_sm = map(model, glance)) %>% 
+  unnest(model_sm) %>% 
+  select(state, r.squared)
+
+
+state_models_chl <- state_chl_coefs %>% 
+  ggplot(aes(r.squared)) +
+  geom_histogram(fill = "steelblue") +
+  geom_vline(data = state_chl_coefs, aes(xintercept = mean(r.squared), fill = "black")) +
+  annotate("text", x = .31, y = 4.5, label = "Average R-Squared\n of State Models",
+           color = "black", size = 4) +
+  theme_clean() +
+  labs(title = "State Models for Challengers")+
+  xlab("R Squared Value") +
+  ylab("")
+  
+
+state_models_inc <- state_inc_coefs %>% 
+  ggplot(aes(r.squared)) +
+  geom_histogram(fill = "steelblue") +
+  geom_vline(data = state_inc_coefs, aes(xintercept = mean(r.squared), fill = "black")) +
+  annotate("text", x = .425, y = 4.5, label = "Average R-Squared\n of State Models",
+           color = "black", size = 4) +
+  theme_clean() +
+  labs(title = "State Models for Incumbent") +
+  xlab("R Squared Value") +
+  ylab("")
+
+state_models_plot <- state_models_chl + state_models_inc
+
+ggsave(path = "images", filename = "state_models_plot.png", height = 4, width = 8)
