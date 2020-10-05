@@ -182,6 +182,6 @@ vs_graph_2004 <- state_grant_dat_lag %>%
   theme_clean() +
   labs(title = "2004")
 
-vs_graphs_incumbent <- vs_graph_1992 + vs_graph_1996 + vs_graph_2004
+vs_graphs_incumbent <- vs_graph_1992 / vs_graph_1996 / vs_graph_2004
 
-ggsave(path = "images", filename = "vs_graphs_incumbent.png", height = 4, width = 8)
+ggsave(path = "images", filename = "vs_graphs_incumbent.png", height = 8, width = 8)
