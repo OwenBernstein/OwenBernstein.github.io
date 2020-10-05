@@ -36,17 +36,20 @@ grant_state$year_type <- recode(grant_state$year_type, "swing + nonelection NA" 
        "core + nonelection NA" = "Core State, Nonelection Year",
        "core + election NA" = "Core State, Election Year")
 
+# Making graph of grant data
 
-grant_state %>%
+grant_bars <- grant_state %>%
   filter(year_type != "NA NA") %>%
   group_by(year_type) %>%
   summarise(mean=mean(grant_mil, na.rm=T), se=sd(grant_mil, na.rm=T)/sqrt(n())) %>%
   ggplot(aes(x=year_type, y=mean, ymin=mean-1.96*se, ymax=mean+1.96*se)) +
   coord_flip() +
-  geom_bar(stat="identity") +
+  geom_bar(stat="identity", fill = "steelblue2") +
   geom_errorbar(width=.2) +
   xlab("") +
   ylab("Federal Grant Spending (Millions of Dollars)") +
   theme_clean() + 
   theme(axis.title = element_text(size=20),
         axis.text = element_text(size=15))
+
+ggsave(path = "images", filename = "federal_grants_bar.png", height = 4, width = 8)
