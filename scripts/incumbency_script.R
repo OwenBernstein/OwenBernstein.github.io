@@ -9,6 +9,7 @@ library(patchwork)
 library(gt)
 library(broom)
 library(usmap)
+library(janitor)
 
 # Reading in data 
 
@@ -20,6 +21,8 @@ polls_2020 <- read.csv("data/polls_2020.csv")
 popvote <- read.csv("data/popvote_1948-2016.csv")
 popvote_state <- read.csv("data/popvote_bystate_1948-2016.csv")
 grant_state <- read.csv("data/fedgrants_bystate_1988-2008.csv") 
+covid_grants <- read.csv("data/covid_grants.csv") %>% 
+  clean_names()
 
 # Observational data about incumbents
 
@@ -132,13 +135,15 @@ state_grant_dat_lag <- clean_popvote %>%
   mutate(dem_vote_chng = D_pv2p - lag(D_pv2p, default = first(D_pv2p))) %>% 
   mutate(rep_vote_chng = R_pv2p - lag(R_pv2p, default = first(R_pv2p))) %>% 
   mutate(grant_chng = (grant_mil / lag(grant_mil, default = first(grant_mil)) - 1) * 100) %>% 
-  filter(incumbent == T)
+  filter(incumbent == T & year != 1984) %>% 
+  mutate(inc_vote_chng = ifelse(year == 1996, dem_vote_chng, rep_vote_chng)) %>% 
+  mutate(inc_pv2p = ifelse(year == 1996, D_pv2p, R_pv2p))
 
 # Making vote share graphs for the incumbents
 
 vs_graph_1992 <- state_grant_dat_lag %>% 
 filter(year == 1992) %>% 
-  ggplot(aes(x=grant_chng, y=rep_vote_chng, label = state)) +
+  ggplot(aes(x=grant_chng, y=inc_vote_chng, label = state)) +
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
@@ -153,7 +158,7 @@ filter(year == 1992) %>%
 
 vs_graph_1996 <- state_grant_dat_lag %>% 
   filter(year == 1996) %>% 
-  ggplot(aes(x=grant_chng, y=dem_vote_chng, label = state)) +
+  ggplot(aes(x=grant_chng, y=inc_vote_chng, label = state)) +
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
@@ -169,7 +174,7 @@ vs_graph_1996 <- state_grant_dat_lag %>%
 
 vs_graph_2004 <- state_grant_dat_lag %>% 
   filter(year == 2004) %>% 
-  ggplot(aes(x=grant_chng, y=rep_vote_chng, label = state)) +
+  ggplot(aes(x=grant_chng, y=inc_vote_chng, label = state)) +
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
@@ -185,3 +190,49 @@ vs_graph_2004 <- state_grant_dat_lag %>%
 vs_graphs_incumbent <- vs_graph_1992 / vs_graph_1996 / vs_graph_2004
 
 ggsave(path = "images", filename = "vs_graphs_incumbent.png", height = 16, width = 8)
+
+# Statistical measures of effect of federal spending
+
+fed_mod <- lm(inc_vote_chng ~ grant_chng, state_grant_dat_lag)
+lm_fed <- summary(fed_mod)
+
+stats <- data.frame(
+  row.names = c("lm_fed"),
+  model = c("Federal Grant Spending Model"),
+  r_squared = c(
+    lm_fed$r.squared),
+  mse = c(
+    sqrt(mean(lm_fed$residuals ^ 2))
+  ))
+
+clean_model <- tidy(fed_mod, conf.int = T) %>% 
+  filter (term == "grant_chng") %>% 
+  bind_cols(stats) %>% 
+  select(r_squared, mse, estimate, conf.low, conf.high)
+
+# Making gt table of model
+
+data.frame(clean_model)
+
+federal_spending_gt <- gt(clean_model) %>% 
+  tab_header(title = "Federal Grant Spending Model") %>% 
+  tab_spanner(columns = vars(estimate, conf.low, conf.high), label = "95% Confidence Interval") %>% 
+  cols_label(r_squared = "R Squared",
+             mse  = "MSE",
+             estimate = "Point Estimate",
+             conf.low = "Low",
+             conf.high = "High") %>% 
+  fmt_number(columns = 1:5,
+             decimals = 2)
+
+gtsave(data = federal_spending_gt, path = "images", filename = "federal_spending_gt.png")
+
+# Observation of 2020 federal spending
+
+florida <- grant_state %>% 
+  filter(state_abb == "Florida" & year >= 2008) %>% 
+  pull(grant_mil) * 1000000
+
+number <- (1102682087 / florida - 1) * 100
+
+predict(fed_mod, newdata = data.frame(grant_chng = number))
