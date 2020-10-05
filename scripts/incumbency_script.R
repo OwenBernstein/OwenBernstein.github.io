@@ -142,8 +142,8 @@ filter(year == 1992) %>%
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
-  xlab("Change in Federal Grant Spending (%)") +
-  ylab("Change in Incumbent Two Party Vote Share (%)") +
+  xlab("Federal Grant Spending Change (%)") +
+  ylab("Incumbent Two-Party Vote Share Change (%)") +
   geom_text() +
   theme_classic() + 
   theme(axis.title = element_text(size=20),
@@ -157,8 +157,8 @@ vs_graph_1996 <- state_grant_dat_lag %>%
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
-  xlab("Change in Federal Grant Spending (%)") +
-  ylab("") +
+  xlab("Federal Grant Spending Change (%)") +
+  ylab("Incumbent Two-Party Vote Share Change (%)") +
   geom_text() +
   theme_classic() + 
   theme(axis.title = element_text(size=20),
@@ -173,8 +173,8 @@ vs_graph_2004 <- state_grant_dat_lag %>%
   geom_vline(xintercept=0, lty=2) +
   geom_hline(yintercept=0, lty=2) +
   geom_smooth(method="lm", color = "steelblue2") +
-  xlab("Change in Federal Grant Spending (%)") +
-  ylab("") +
+  xlab("Federal Grant Spending Change (%)") +
+  ylab("Incumbent Two-Party Vote Share Change (%)") +
   geom_text() +
   theme_classic() + 
   theme(axis.title = element_text(size=20),
@@ -184,4 +184,4 @@ vs_graph_2004 <- state_grant_dat_lag %>%
 
 vs_graphs_incumbent <- vs_graph_1992 / vs_graph_1996 / vs_graph_2004
 
-ggsave(path = "images", filename = "vs_graphs_incumbent.png", height = 8, width = 8)
+ggsave(path = "images", filename = "vs_graphs_incumbent.png", height = 16, width = 8)

@@ -9,9 +9,10 @@ One key aspect of elections, especially presidential elections, are the advantag
 
 Since 1948, when incumbent candidates run for president they have won **73%** of the time. Only George HW Bush, Gerald Ford, and Jimmy Carter have lost when running as an incumbent. Furthermore, incumbent candidates have won, on average, **53% of the two party popular vote.** While many explanations for the impressive performance of incumbent candidates have been offered, one of the most convincing is the incumbent's ability to influence voters by facilitating federal funding. 
 
-![picture](../images/federal_grants_bar.png)
+![picture](../images/grant_spending_barplot.png)
 
-In general, swing states receive more federal funding than non swing states. However, during election years when the incumbent is up for reelection, federal grant funding in swing states increases significantly from **around 150 to 180 million dollars.** This prominent difference suggests that when up for reelection, incumbent candidates attempt to influence critical swing state voters by increasing federal grant funding. To measure the effect of these efforts, I will examine how voting for an incumbent changed in response to federal grant spending increases. 
+This graph shows that in general, swing states receive more federal funding than non-swing (core) states. However, during election years when the incumbent is up for reelection, federal grant funding in swing states increases significantly from **around 150 to 180 million dollars.** This prominent difference suggests that when up for reelection, incumbent candidates attempt to influence critical swing state voters by increasing federal grant funding. To measure the effect of these efforts, I will examine how an incumbent's two party vote share changed from one election to the next in response to federal grant spending increases in the same time frame. 
 
 ![picture](../images/vs_graphs_incumbent.png)
 
+These graphs suggest a surprising trend. Not only does it appear that increasing federal funding to a state does not increase the incumbent's vote share, it even appears that in 1992 and 2004 increasing grants actually harmed the incumbent. While these results are certainly not intuitive, it may be that incumbents intentionally spend more money in states they are afraid to lose or perhaps the apparent trends are not statistically significant. To determine the validity of these results, I will apply a more statistical model to vote share and federal grant spending.
