@@ -58,7 +58,7 @@ grant_bars <- grant_state %>%
   theme(axis.title = element_text(size=20),
         axis.text = element_text(size=15))
 
-ggsave(path = "images", filename = "federal_grants_bar.png", height = 4, width = 8)
+ggsave(path = "images", filename = "federal_grants_bar.png", height = 4, width = 10)
 
 # Joining state voting and state grants
 
