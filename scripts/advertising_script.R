@@ -1,0 +1,67 @@
+# Loading libraries
+
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(ggrepel)
+library(ggthemes)
+library(patchwork)
+library(gt)
+library(broom)
+library(usmap)
+library(janitor)
+
+# Reading in data 
+
+econ <- read.csv("data/econ.csv")
+local <- read.csv("data/local.csv")
+avgpoll_time <- read.csv("data/pollavg_1968-2016 (1).csv")
+avgpoll_time_state <- read.csv("data/pollavg_bystate_1968-2016 (1).csv")
+polls_2020 <- read.csv("data/polls_2020.csv")
+popvote <- read.csv("data/popvote_1948-2016.csv")
+popvote_state <- read.csv("data/popvote_bystate_1948-2016.csv")
+grant_state <- read.csv("data/fedgrants_bystate_1988-2008.csv") 
+covid_grants <- read.csv("data/covid_grants.csv") %>% 
+  clean_names()
+ad_creative <- read_csv("data/ad_creative_2000-2012.csv")
+ad_campaigns <- read_csv("data/ad_campaigns_2000-2012.csv")
+
+# Graph of advertisement cost
+
+options(scipen = 999)
+
+ad_spending_bar <- ad_campaigns %>% 
+  group_by(party, cycle) %>% 
+  summarise(cost = sum(total_cost)) %>% 
+  ggplot(aes(cycle, cost, fill = party)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_clean() +
+  labs(x = "", y = "Advertisement Spending (Millions)", title = "Total Advertisement Spending by Election and Party") +
+  scale_fill_manual(values = c("steelblue2", "indianred"), 
+                    name = "Party", labels = c("Democrat", "Republican")) + 
+  scale_y_continuous(breaks = c(750000000, 500000000, 250000000), label = c("750", "500", "250")) +
+  scale_x_continuous(breaks = c(2000, 2004, 2008, 2012))
+  
+ggsave(path = "images", filename = "advertising spending_bar.png", height = 6, width = 10)
+
+# Graph of spending over time
+
+
+ad_campaigns %>%
+  mutate(year = as.numeric(substr(air_date, 1, 4))) %>%
+  mutate(month = as.numeric(substr(air_date, 6, 7))) %>%
+  filter(year %in% c(2000, 2004, 2008, 2012), month > 7) %>%
+  group_by(cycle, air_date, party) %>%
+  summarise(total_cost = sum(total_cost)) %>%
+  ggplot(aes(x=air_date, y=total_cost, color=party)) +
+  # scale_x_date(date_labels = "%b, %Y") +
+  scale_y_continuous(labels = dollar_format()) +
+  scale_color_manual(values = c("blue","red"), name = "") +
+  geom_line() + geom_point(size=0.5) +
+  facet_wrap(cycle ~ ., scales="free") +
+  xlab("") + ylab("ad spend") +
+  theme_bw() +
+  theme(axis.title = element_text(size=20),
+        axis.text = element_text(size=11),
+        strip.text.x = element_text(size = 20))
+
