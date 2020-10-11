@@ -7,6 +7,8 @@ In this week's blog post I will examine the most public facing aspect of an elec
 
 ![picture](../images/advertising spending_bar.png)
 
+![picture](../images/advertising spending_time.png)
+
 Graph of campaign spending by election 
 
 graph of when campaigns spend money

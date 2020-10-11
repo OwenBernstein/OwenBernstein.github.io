@@ -44,24 +44,25 @@ ad_spending_bar <- ad_campaigns %>%
   
 ggsave(path = "images", filename = "advertising spending_bar.png", height = 6, width = 10)
 
-# Graph of spending over time
-
-
-ad_campaigns %>%
-  mutate(year = as.numeric(substr(air_date, 1, 4))) %>%
-  mutate(month = as.numeric(substr(air_date, 6, 7))) %>%
-  filter(year %in% c(2000, 2004, 2008, 2012), month > 7) %>%
-  group_by(cycle, air_date, party) %>%
+# Graph of spending over time 
+  
+ad_spending_time <- ad_campaigns %>% 
+  mutate(date = mdy(air_date)) %>% 
+  mutate(month = as.numeric(substr(date, 6, 7))) %>% 
+  mutate(year = as.numeric(substr(date, 1, 4))) %>% 
+  filter(year %in% c(2000, 2004, 2008, 2012), month > 7 & month < 10) %>%
+  group_by(cycle, date, party) %>%
   summarise(total_cost = sum(total_cost)) %>%
-  ggplot(aes(x=air_date, y=total_cost, color=party)) +
-  # scale_x_date(date_labels = "%b, %Y") +
+  ggplot(aes(x=date, y=total_cost, color=party)) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b, %Y") +
   scale_y_continuous(labels = dollar_format()) +
-  scale_color_manual(values = c("blue","red"), name = "") +
+  scale_color_manual(values = c("steelblue2","indianred"), name = "Party", labels = c("Democrat", "Republican")) +
   geom_line() + geom_point(size=0.5) +
   facet_wrap(cycle ~ ., scales="free") +
-  xlab("") + ylab("ad spend") +
-  theme_bw() +
+  xlab("") + ylab("Ad Spending") +
+  theme_clean() +
   theme(axis.title = element_text(size=20),
         axis.text = element_text(size=11),
         strip.text.x = element_text(size = 20))
 
+ggsave(path = "images", filename = "advertising spending_time.png", height = 6, width = 10)
