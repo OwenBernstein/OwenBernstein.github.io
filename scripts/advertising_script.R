@@ -26,24 +26,6 @@ covid_grants <- read.csv("data/covid_grants.csv") %>%
 ad_creative <- read_csv("data/ad_creative_2000-2012.csv")
 ad_campaigns <- read_csv("data/ad_campaigns_2000-2012.csv")
 
-# Graph of advertisement cost
-
-options(scipen = 999)
-
-ad_spending_bar <- ad_campaigns %>% 
-  group_by(party, cycle) %>% 
-  summarise(cost = sum(total_cost)) %>% 
-  ggplot(aes(cycle, cost, fill = party)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  theme_clean() +
-  labs(x = "", y = "Advertisement Spending (Millions)", title = "Total Advertisement Spending by Election and Party") +
-  scale_fill_manual(values = c("steelblue2", "indianred"), 
-                    name = "Party", labels = c("Democrat", "Republican")) + 
-  scale_y_continuous(breaks = c(750000000, 500000000, 250000000), label = c("750", "500", "250")) +
-  scale_x_continuous(breaks = c(2000, 2004, 2008, 2012))
-  
-ggsave(path = "images", filename = "advertising spending_bar.png", height = 6, width = 10)
-
 # Graph of spending over time 
   
 ad_spending_time <- ad_campaigns %>% 
