@@ -11,14 +11,11 @@ In every presidential election from 2000 to 2004 both parties spent large sums o
 
 ![picture](../images/advertising spending_time.png)
 
-From these graphs it is clear that campaigns tend to spend more as the election gets closer. **Spending in October appears to be significantly higher than earlier months.** 
+From these graphs it is clear that campaigns tend to spend more as the election gets closer. **Spending in October appears to be significantly higher than earlier months.** This could be explained by a belief that voter's who see advertisements closer to the election are more likely to be persuaded by the advertisement. To answer the question of whether advertisement spending can be used to predict election results, and when advertisements are most effective, I will create **a model incorporating polling and advertisement spending to predict state level vote shares.**
 
-say something about why you chose these months
 
-Graph of campaign spending by election 
 
-graph of when campaigns spend money
+Do state model with most recent month polls and total average spending
+state model with polls and most recent month ad spending
 
-model of if it helps and when helps
-
-state level model for 2020
+predict this election
