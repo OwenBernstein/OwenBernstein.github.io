@@ -10,6 +10,7 @@ library(gt)
 library(broom)
 library(usmap)
 library(janitor)
+library(statebins)
 
 # Reading in data 
 
@@ -196,3 +197,120 @@ ad_models_gt <- gt(stats) %>%
              decimals = 2)
 
 gtsave(data = ad_models_gt, path = "images", filename = "ad_models_gt.png")
+
+# Predicting for each state
+
+predict_polls <- polls_2020 %>% 
+  select(poll_id, state, answer, end_date, pct) %>% 
+  mutate(end_date = mdy(polls_2020$end_date)) %>% 
+  filter(end_date > ymd("2020-08-27") & end_date < ymd("2020-09-27")) %>% 
+  filter(answer == "Biden" | answer == "Trump") %>% 
+  group_by(state, answer) %>% 
+  summarise(avg_support = mean(pct)) %>% 
+  filter(!(state %in% c("", "District of Columbia", "ME-1","ME-2","NE-1","NE-2","NE-3")))
+
+ads_2020$state <- recode(ads_2020$state,
+                               "AK" = "Alaska",
+                               "AL" = "Alabama",
+                               "AR" = "Arkansas",
+                               "AZ" = "Arizona",
+                               "CA" = "California",
+                               "CO" = "Colorado",
+                               "CT" = "Connecticut",
+                               "DC" = "District of Columbia",
+                               "DE" = "Delaware",
+                               "FL" = "Florida",
+                               "GA" = "Georgia",
+                               "HI" = "Hawaii",
+                               "IA" = "Iowa",
+                               "ID" = "Idaho",
+                               "IL" = "Illinois",
+                               "IN" = "Indiana",
+                               "KS" = "Kansas",
+                               "KY" = "Kentucky",
+                               "LA" = "Louisiana",
+                               "MA" = "Massachusetts",
+                               "MD" = "Maryland",
+                               "ME" = "Maine",
+                               "MI" = "Michigan",
+                               "MN" = "Minnesota",
+                               "MO" = "Missouri",
+                               "MS" = "Mississippi",
+                               "MT" = "Montana",
+                               "NC" = "North Carolina",
+                               "ND" = "North Dakota",
+                               "NE" = "Nebraska",
+                               "NH" = "New Hampshire",
+                               "NJ" = "New Jersey",
+                               "NM" = "New Mexico",
+                               "NV" = "Nevada",
+                               "NY" = "New York",
+                               "OH" = "Ohio",
+                               "OK" = "Oklahoma",
+                               "OR" = "Oregon",
+                               "PA" = "Pennsylvania",
+                               "RI" = "Rhode Island",
+                               "SC" = "South Carolina",
+                               "SD" = "South Dakota",
+                               "TN" = "Tennessee",
+                               "TX" = "Texas",
+                               "UT" = "Utah",
+                               "VA" = "Virginia",
+                               "VT" = "Vermont",
+                               "WA" = "Washington", 
+                               "WI" = "Wisconsin", 
+                               "WY" = "Wyoming")
+predict_ads <- ads_2020 %>% 
+  group_by(state) %>% 
+  mutate(dem_total_cost = sum(biden_airings) / sum(total_airings) * sum(total_cost)) %>% 
+  mutate(rep_total_cost = sum(trump_airings) / sum(total_airings) * sum(total_cost)) %>% 
+  select(state, dem_total_cost, rep_total_cost) %>% 
+  unique()
+
+
+newdata <- predict_ads %>% 
+  inner_join(predict_polls, by = c("state")) %>% 
+  filter(answer == "Biden") %>% 
+  mutate(month_cost = dem_total_cost) %>% 
+  mutate(avg_poll = avg_support) %>% 
+  select(state, month_cost, avg_poll)
+
+predictions <- data.frame(predict(month_spend_dem_mod, newdata))
+
+# Turning predictions into a dataframe, thank you to Yao for suggesting the statebins package
+
+state_dem_vs <- predictions %>% 
+  mutate(state = newdata$state) %>% 
+  mutate(dem_vs = predict.month_spend_dem_mod..newdata.) %>% 
+  mutate(winner = ifelse(dem_vs > 50, "Biden", "Trump")) %>% 
+  select(state, winner) %>%
+  add_row(state = "Alabama", winner = "Trump") %>% 
+  add_row(state = "Alaska", winner = "Trump") %>%
+  add_row(state = "Arkansas", winner = "Trump") %>%
+  add_row(state = "Connecticut", winner = "Biden") %>%
+  add_row(state = "Delaware", winner = "Biden") %>%
+  add_row(state = "Hawaii", winner = "Biden") %>%
+  add_row(state = "Illinois", winner = "Biden") %>%
+  add_row(state = "Kansas", winner = "Trump") %>%
+  add_row(state = "Maryland", winner = "Biden") %>%
+  add_row(state = "Massachusetts", winner = "Biden") %>%
+  add_row(state = "Nebraska", winner = "Trump") %>%
+  add_row(state = "New Jersey", winner = "Biden") %>%
+  add_row(state = "New York", winner = "Biden") %>%
+  add_row(state = "North Dakota", winner = "Trump") %>%
+  add_row(state = "Rhode Island", winner = "Biden") %>%
+  add_row(state = "South Dakota", winner = "Trump") %>%
+  add_row(state = "Tennessee", winner = "Trump") %>%
+  add_row(state = "West Virginia", winner = "Trump") %>%
+  add_row(state = "Wyoming", winner = "Trump") 
+
+statebin_map <- state_dem_vs %>% 
+  ggplot(aes(state = state, fill = fct_relevel(winner, "Biden", "Trump"))) +
+  geom_statebins() +
+  theme_statebins() +
+  labs(title = "2020 Presidential Election Prediction Map",
+       subtitle = "Using Polls and Last Two Months of Ad Spending",
+       fill = "") +
+  scale_fill_manual(values=c("steelblue2", "indianred"), breaks = c("Biden", "Trump"))
+
+ggsave(path = "images", filename = "poll_spend_predict.png", height = 6, width = 10)

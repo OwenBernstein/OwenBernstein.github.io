@@ -21,3 +21,4 @@ These models show some very interesting, and somewhat unintuitive results. The f
 
 Using the polls and last two month ad spending model, I will predict the outcome of the 2020 election at the state level. Due to data constraints, namely that data for the last month of ad spending is not available, I will only be using the advertisement spending from September. 
 
+![picture](../images/poll_spend_predict.png)
