@@ -13,9 +13,11 @@ In every presidential election from 2000 to 2004 both parties spent large sums o
 
 From these graphs it is clear that campaigns tend to spend more as the election gets closer. **Spending in October appears to be significantly higher than earlier months.** This could be explained by a belief that voter's who see advertisements closer to the election are more likely to be persuaded by the advertisement. To answer the question of whether advertisement spending can be used to predict election results, and when advertisements are most effective, I will create **a model incorporating polling and advertisement spending to predict state level vote shares.**
 
+![picture](../images/ad_models_gt.png)
 
+These models show some very interesting, and somewhat unintuitive results. The first model is based only on poll averages from 5-11 weeks before the election. This model, which I have explored in the past, works decently well. **The R squared value of 0.78 for Republicans and 0.83 for Democrats shows that the polls can explain 78% and 83% respectively of variance in the state two party vote share.** Interestingly, adding total advertisement spending to the model increases the R squared value slightly and also decreases the mean squared error (a measure of fit) for both models. This suggests that **adding ad spending makes the model better.** However, adding only the last two months of ad spending, which I predicted to be the most important for election outcomes, decreases the R squared value. On the other hand, the MSE decreases significantly which suggests that this model actually fits the data better. **For this reason, I think the polls combined with the last two months of ad spending is the best model of these three and I will use it moving forward.**
 
-Do state model with most recent month polls and total average spending
-state model with polls and most recent month ad spending
+## Predicting 2020
 
-predict this election
+Using the polls and last two month ad spending model, I will predict the outcome of the 2020 election at the state level. Due to data constraints, namely that data for the last month of ad spending is not available, I will only be using the advertisement spending from September. 
+

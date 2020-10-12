@@ -106,7 +106,7 @@ clean_campaign$state <- recode(clean_campaign$state,
 # Modeling using polling and full cycle ad spending
 
 total_spend_mod <- clean_campaign %>% 
-  group_by(cycle, state) %>% 
+  group_by(cycle, state, party) %>% 
   mutate(total_cost = sum(total_cost)) %>% 
   ungroup() %>% 
   inner_join(avgpoll_time_state, by = c("party", "year", "state")) %>% 
@@ -130,7 +130,7 @@ poll_spend_rep <- lm(R_pv2p ~ avg_poll + total_cost, poll_rep)
 # Creating models for last months of ad spending
 
 month_spend_mod <- clean_campaign %>% 
-  group_by(cycle, state) %>% 
+  group_by(cycle, state, party) %>% 
   filter(month == 9 | month == 10) %>%
   mutate(month_cost = sum(total_cost)) %>% 
   ungroup() %>% 
@@ -149,36 +149,50 @@ month_spend_rep <- month_spend_mod %>%
 
 month_spend_dem_mod <- lm(D_pv2p ~ avg_poll + month_cost, month_spend_dem)
 month_spend_rep_mod <- lm(R_pv2p ~ avg_poll + month_cost, month_spend_rep)
-  
-  
 
+# Creating summaries of the models
 
+sm_poll_dem <- summary(poll_dem_mod)
+sm_poll_rep <- summary(poll_rep_mod)
+sm_total_spend_dem <- summary(poll_spend_dem)
+sm_total_spend_rep <- summary(poll_spend_rep)
+sm_month_spend_dem <- summary(month_spend_dem_mod)
+sm_month_spend_rep <- summary(month_spend_rep_mod)
 
 stats <- data.frame(
-  row.names = c("lm_fed"),
-  model = c("Federal Grant Spending Model"),
+  row.names = c("poll_rep", "total_spend_rep",  "month_spend_rep", "poll_dem", "total_spend_dem", "month_spend_dem"),
+  model = c("Polls Only Republican",
+            "Polls and Total Ad Spending Republican",
+            "Polls and Last 2 Months Ad Spending Republican",
+            "Polls Only Democrat",
+            "Polls and Total Ad Spending Democrat",
+            "Polls and Last 2 Months Ad Spending Democrat"),
   r_squared = c(
-    lm_fed$r.squared),
+    sm_poll_rep$r.squared,
+    sm_total_spend_rep$r.squared,
+    sm_month_spend_rep$r.squared,
+    sm_poll_dem$r.squared,
+    sm_total_spend_dem$r.squared,
+    sm_month_spend_dem$r.squared
+  ),
   mse = c(
-    sqrt(mean(lm_fed$residuals ^ 2))
-  ))
-
-clean_model <- tidy(fed_mod, conf.int = T) %>% 
-  filter (term == "grant_chng") %>% 
-  bind_cols(stats) %>% 
-  select(r_squared, mse, estimate, conf.low, conf.high)
+    sqrt(mean(sm_poll_rep$residuals ^ 2)),
+    sqrt(mean(sm_total_spend_rep$residuals ^ 2)),
+    sqrt(mean(sm_month_spend_rep$residuals ^ 2)),
+    sqrt(mean(sm_poll_dem$residuals ^ 2)),
+    sqrt(mean(sm_total_spend_dem$residuals ^ 2)),
+    sqrt(mean(sm_month_spend_dem$residuals ^ 2))
+  )
+)
 
 # Making gt table of model
 
-data.frame(clean_model)
-
-federal_spending_gt <- gt(clean_model) %>% 
-  tab_header(title = "Federal Grant Spending Model") %>% 
-  tab_spanner(columns = vars(estimate, conf.low, conf.high), label = "95% Confidence Interval") %>% 
-  cols_label(r_squared = "R Squared",
-             mse  = "MSE",
-             estimate = "Point Estimate",
-             conf.low = "Low",
-             conf.high = "High") %>% 
-  fmt_number(columns = 1:5,
+ad_models_gt <- gt(stats) %>% 
+  tab_header(title = "State Election Models Using Polls and Ad Spending") %>% 
+  cols_label(model = "Model",
+             r_squared = "R Squared",
+             mse = "MSE") %>% 
+  fmt_number(columns = 2:3,
              decimals = 2)
+
+gtsave(data = ad_models_gt, path = "images", filename = "ad_models_gt.png")
