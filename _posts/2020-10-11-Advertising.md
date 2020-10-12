@@ -22,3 +22,5 @@ These models show some very interesting, and somewhat unintuitive results. The f
 Using the polls and last two month ad spending model, I will predict the outcome of the 2020 election at the state level. Due to data constraints, namely that data for the last month of ad spending is not available, I will only be using the advertisement spending from September. 
 
 ![picture](../images/poll_spend_predict.png)
+
+This model predicts an overwhelming victory for Biden. In this model **Biden wins 392 electoral votes and Trump wins only 146.** Every swing state, aside from Florida, and including Texas and south Carolina swings towards Biden. This result, while fairly accurate when predicting historical outcomes, **predicts a very unlikely outcome.** Do to these seemingly inaccurate predictions, I would not trust this model. However, even if this model is not correct, it does still suggest that Biden has an advantage in many crucial swing states.  
