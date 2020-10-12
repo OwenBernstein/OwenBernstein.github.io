@@ -7,11 +7,11 @@ In this week's blog post I will examine the most public facing aspect of an elec
 
 ## Advertisement Spending
 
-In every presidential election from 2000 to 2004 both parties spent large sums of money on advertising. This spending varied drastically by state and time, giving some clue that **campaigns strategically invest in advertisements.** Research from Alan Gerber and Gregory Huber confirms this prediction and gives evidence that **political advertising can in fact have a persuasive effect on voters.** Knowing this, I will explore how much campaigns have been spending 
+In every presidential election from 2000 to 2012 both parties spent large sums of money on advertising. This spending varied drastically by state and time, giving some clue that **campaigns strategically invest in advertisements.** Research from Alan Gerber and Gregory Huber confirms this prediction and gives evidence that **political advertising can in fact have a persuasive effect on voters.** Knowing this, I will explore how much money campaigns have been spending on advertising and when this spending has historically occurred. 
 
 ![picture](../images/advertising spending_time.png)
 
-From these graphs it is clear that campaigns tend to spend more as the election gets closer. **Spending in October appears to be significantly higher than earlier months.** This could be explained by a belief that voter's who see advertisements closer to the election are more likely to be persuaded by the advertisement. To answer the question of whether advertisement spending can be used to predict election results, and when advertisements are most effective, I will create **a model incorporating polling and advertisement spending to predict state level vote shares.**
+From these graphs it is clear that campaigns tend to spend more as the election gets closer. **Spending in October appears to be significantly higher than earlier months.** This could be explained by a belief that voter's who see advertisements closer to the election are more likely to be persuaded by the advertisement. To answer the question of advertisement spending's effectiveness as a predictive model, and when advertisements are most efficient, I will create **a model incorporating polling and advertisement spending to predict state level vote shares.**
 
 ![picture](../images/ad_models_gt.png)
 
@@ -23,4 +23,4 @@ Using the polls and last two month ad spending model, I will predict the outcome
 
 ![picture](../images/poll_spend_predict.png)
 
-This model predicts an overwhelming victory for Biden. In this model **Biden wins 392 electoral votes and Trump wins only 146.** Every swing state, aside from Florida, and including Texas and south Carolina swings towards Biden. This result, while fairly accurate when predicting historical outcomes, **predicts a very unlikely outcome.** Do to these seemingly inaccurate predictions, I would not trust this model. However, even if this model is not correct, it does still suggest that Biden has an advantage in many crucial swing states.  
+This model predicts an overwhelming victory for Biden. In this model **Biden wins 392 electoral votes and Trump wins only 146.** Every swing state, aside from Florida, Texas and south Carolina all swing towards Biden. This model, while fairly accurate when predicting historical outcomes, **predicts an intuitively unlikely outcome.** Do to these seemingly inaccurate predictions, I would not trust this model. However, even if this model is not correct, it does still suggest that Biden has an advantage in many crucial swing states.  
