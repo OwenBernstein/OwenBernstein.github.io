@@ -302,7 +302,8 @@ state_dem_vs <- predictions %>%
   add_row(state = "South Dakota", winner = "Trump") %>%
   add_row(state = "Tennessee", winner = "Trump") %>%
   add_row(state = "West Virginia", winner = "Trump") %>%
-  add_row(state = "Wyoming", winner = "Trump") 
+  add_row(state = "Wyoming", winner = "Trump") %>% 
+  add_row(state = "District of Columbia", winner = "Biden")
 
 statebin_map <- state_dem_vs %>% 
   ggplot(aes(state = state, fill = fct_relevel(winner, "Biden", "Trump"))) +
