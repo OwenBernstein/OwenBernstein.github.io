@@ -163,4 +163,27 @@ dem_poll_correct <- colMeans(outsamp_df[3], na.rm=T)
 
 # Creating gt table
 
+stats <- data.frame(
+  row.names = c("full_poll_mod", "dem_poll_mod"),
+  model = c("Polls, Ad Spending and Demographics",
+            "Polls and Demographics"),
+  margins = c(
+    full_mod_margin,
+    dem_poll_margin
+  ),
+  correct_pred = c(
+    full_mod_correct,
+    dem_poll_correct
+  )
+)
 
+poll_dem_spend_gt <- gt(stats) %>% 
+  tab_header(title = "Out of Sample Prediction",
+             subtitle = "Models Using Polls, Ad Spending, and Demographics") %>% 
+  cols_label(model = "Model",
+             margins = "Average Prediction Error",
+             correct_pred = "Correct Prediction Percentage") %>% 
+  fmt_number(columns = 2:3,
+             decimals = 2)
+
+gtsave(data = poll_dem_spend_gt, path = "images", filename = "poll_dem_spend_gt.png")
