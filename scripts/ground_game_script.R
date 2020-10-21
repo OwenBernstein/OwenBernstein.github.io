@@ -278,7 +278,7 @@ statebin_map_2 <- state_dem_vs_2 %>%
   geom_statebins() +
   theme_statebins() +
   labs(title = "2020 Presidential Election Prediction Map",
-       subtitle = "Using Polls and Demographics",
+       subtitle = "Using Polls and Decreased Demographic Effects",
        fill = "") +
   scale_fill_manual(values=c("steelblue2", "indianred"), breaks = c("Biden", "Trump"))
 
