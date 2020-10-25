@@ -29,30 +29,57 @@ covid <- read_csv("data/COVID-19_Cases_and_Deaths.csv")
 pop <- read_csv("data/populations.csv") %>% 
   select(NAME, CENSUS2010POP)
 
-covid_data <- covid %>% 
+# Making Covid data
+
+covid_clean <- covid %>% 
   mutate(submission_date = mdy(submission_date)) %>% 
   mutate(month = as.numeric(substr(submission_date, 6, 7))) %>% 
-  filter(month > 8) %>% 
+  filter(month > 7) %>% 
   group_by(state) %>% 
-  mutate(avg_new_case = mean(new_case)) %>% 
-  mutate(avg_new_death = mean(new_death)) %>% 
+  mutate(avg_new_case = sum(new_case)) %>% 
+  mutate(avg_new_death = sum(new_death)) %>% 
   select(state, avg_new_death, avg_new_case) %>% 
   unique()
 
-covid_data$state <- state.name[match(covid_data$state, state.abb)]
+covid_clean$state <- state.name[match(covid_clean$state, state.abb)]
 
-
-dat <- covid_data %>% 
+covid_data <- covid_clean %>% 
   inner_join(pop, by = c("state" = "NAME")) %>% 
+  group_by(state) %>% 
   mutate(avg_per_cap_cases = avg_new_case/CENSUS2010POP * 100000) %>% 
   mutate(avg_per_cap_deaths = avg_new_death/CENSUS2010POP * 100000) %>% 
   ungroup() %>% 
   mutate(average_cases = mean(avg_new_case)/mean(CENSUS2010POP) * 100000) %>% 
   mutate(average_deaths = mean(avg_new_death)/mean(CENSUS2010POP) * 100000) %>% 
-  arrange(desc(avg_per_cap_deaths)) %>% 
-  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Ohio", "North Carolina", "Arizona", "Iowa")) %>% 
-  mutate(avg_btg = mean(avg_new_death)/mean(CENSUS2010POP) * 100000)
+  arrange(desc(avg_per_cap_deaths))
 
-barplot(height = dat$avg_per_cap_deaths, names = dat$state, las = 1, col = "steelblue2")
-abline(h = mean(dat$average_deaths), col = "indianred", lty = 2, lwd = 3)
+# Making country covid data
+
+covid_19_deaths <- covid_data %>% 
+  ggplot(aes(state = state, fill = avg_per_cap_deaths)) +
+  geom_statebins() +
+  theme_statebins() +
+  labs(title = "COVID-19 Deaths Per Capita Since August",
+       fill = "Deaths") +
+  scale_fill_gradient(high = "indianred", low = "steelblue2")
+
+ggsave(path = "images", filename = "country_covid.png", height = 6, width = 10)
+
+# Making battleground states covid graph
+
+dat <- covid_data %>% 
+  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Georgia", "North Carolina", "Arizona", "Michigan"))
+
+battleground_covid <- dat %>% 
+  ggplot(aes(x = reorder(state, -avg_per_cap_deaths), y = avg_per_cap_deaths)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Recent COVID-19 Deaths in Battleground States",
+       x = "",
+       y = "Deaths per 100,000 Since August") +
+  theme_clean() +
+  geom_hline(yintercept = dat$average_deaths, lwd = 2, lty = 2, col = "indianred")
+
+ggsave(path = "images", filename = "battelground_covid.png", height = 6, width = 10)
+
+
 
