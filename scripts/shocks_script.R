@@ -65,6 +65,19 @@ covid_19_deaths <- covid_data %>%
 
 ggsave(path = "images", filename = "country_covid.png", height = 6, width = 10)
 
+covid_19_cases <- covid_data %>% 
+  ggplot(aes(state = state, fill = avg_per_cap_cases)) +
+  geom_statebins() +
+  theme_statebins() +
+  labs(title = "COVID-19 Cases Per Capita Since August",
+       fill = "Cases") +
+  scale_fill_gradient(high = "indianred", low = "steelblue2")
+
+
+covid_country <- covid_19_cases + covid_19_deaths
+
+ggsave(path = "images", filename = "country_covid.png", height = 6, width = 10)
+
 # Making battleground states covid graph
 
 dat <- covid_data %>% 
@@ -79,6 +92,17 @@ battleground_covid <- dat %>%
        y = "Deaths per 100,000 Since August") +
   theme_clean() +
   geom_hline(yintercept = dat$average_deaths, lwd = 2, lty = 2, col = "indianred")
+
+battleground_covid_cases <- dat %>% 
+  ggplot(aes(x = reorder(state, -avg_per_cap_cases), y = avg_per_cap_cases)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Recent COVID-19 Cases in Battleground States",
+       x = "",
+       y = "Cases per 100,000 Since August") +
+  theme_clean() +
+  geom_hline(yintercept = dat$average_cases, lwd = 2, lty = 2, col = "indianred")
+
+battleground_covid_graph <- battleground_covid_cases + battleground_covid
 
 ggsave(path = "images", filename = "battelground_covid.png", height = 6, width = 10)
 
@@ -102,12 +126,13 @@ polls <- polls_2020 %>%
   unique()
  
 covid_week <- covid %>% 
-   select(submission_date, state, new_death) %>% 
+   select(submission_date, state, new_death, new_case) %>% 
    mutate(submission_date = mdy(submission_date)) %>% 
    filter(submission_date > ymd("2020-08-01") & submission_date < ymd("2020-10-17")) %>% 
    mutate(date = floor_date(submission_date, "1 week")) %>% 
    group_by(state, date) %>% 
-   summarize(new_death = sum(new_death))
+   summarize(new_death = sum(new_death),
+             new_case = sum(new_case))
 
 covid_week$state <- state.name[match(covid_week$state, state.abb)]
 
@@ -128,3 +153,18 @@ death_trends <- dat_2 %>%
   theme_minimal() +
   labs(y = "Weekly Change in Polls",
        x = "Weekly New Covid Deaths")
+
+case_trends <- dat_2 %>% 
+  ggplot(aes(log(new_case), poll_chng)) +
+  geom_point() +
+  facet_wrap(~ state) +
+  geom_smooth(method = "lm", se = F) +
+  theme_minimal() +
+  labs(y = "Weekly Change in Polls",
+       x = "Weekly New Covid Cases")
+
+covid_trends <- case_trends + death_trends
+
+ggsave(path = "images", filename = "covid_polls.png", height = 6, width = 10)
+
+
