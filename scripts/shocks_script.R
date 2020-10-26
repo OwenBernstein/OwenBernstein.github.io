@@ -68,7 +68,8 @@ ggsave(path = "images", filename = "country_covid.png", height = 6, width = 10)
 # Making battleground states covid graph
 
 dat <- covid_data %>% 
-  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Georgia", "North Carolina", "Arizona", "Michigan"))
+  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Georgia", "North Carolina",
+                      "Arizona", "Michigan", "Ohio", "New Hampshire"))
 
 battleground_covid <- dat %>% 
   ggplot(aes(x = reorder(state, -avg_per_cap_deaths), y = avg_per_cap_deaths)) +
@@ -81,5 +82,49 @@ battleground_covid <- dat %>%
 
 ggsave(path = "images", filename = "battelground_covid.png", height = 6, width = 10)
 
+# Measuring Effect on Polls
 
+polls <- polls_2020 %>% 
+  select(poll_id, state, answer, end_date, pct) %>% 
+  mutate(end_date = mdy(polls_2020$end_date)) %>% 
+  filter(end_date > ymd("2020-08-01") & end_date < ymd("2020-10-17")) %>% 
+  filter(answer == "Biden" | answer == "Trump") %>% 
+  mutate(date = floor_date(end_date, "1 week")) %>% 
+  group_by(answer, date) %>% 
+  mutate(nat_poll = mean(pct)) %>%
+  ungroup() %>% 
+  group_by(state, answer, date) %>% 
+  mutate(avg_poll = mean(pct)) %>% 
+  filter(answer == "Trump") %>% 
+  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Georgia", "North Carolina",
+                      "Arizona", "Michigan", "Ohio", "New Hampshire")) %>% 
+  select(state, answer, date, nat_poll, avg_poll) %>% 
+  unique()
+ 
+covid_week <- covid %>% 
+   select(submission_date, state, new_death) %>% 
+   mutate(submission_date = mdy(submission_date)) %>% 
+   filter(submission_date > ymd("2020-08-01") & submission_date < ymd("2020-10-17")) %>% 
+   mutate(date = floor_date(submission_date, "1 week")) %>% 
+   group_by(state, date) %>% 
+   summarize(new_death = sum(new_death))
 
+covid_week$state <- state.name[match(covid_week$state, state.abb)]
+
+dat_2 <- covid_week %>% 
+  filter(state %in% c("Florida", "Wisconsin", "Pennsylvania", "Georgia", "North Carolina",
+                      "Arizona", "Michigan", "Ohio", "New Hampshire")) %>% 
+  full_join(polls, by = c("state", "date")) %>% 
+  select(-answer) %>% 
+  mutate(state_poll_chng = avg_poll - lag(avg_poll, order_by = date)) %>% 
+  mutate(nat_poll_chng = nat_poll - lag(nat_poll, order_by = date)) %>% 
+  mutate(poll_chng = state_poll_chng - nat_poll_chng)
+
+death_trends <- dat_2 %>% 
+  ggplot(aes(log(new_death), poll_chng)) +
+  geom_point() +
+  facet_wrap(~ state) +
+  geom_smooth(method = "lm", se = F) +
+  theme_minimal() +
+  labs(y = "Weekly Change in Polls",
+       x = "Weekly New Covid Deaths")
