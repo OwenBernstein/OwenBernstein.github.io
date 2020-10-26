@@ -104,7 +104,7 @@ battleground_covid_cases <- dat %>%
 
 battleground_covid_graph <- battleground_covid_cases + battleground_covid
 
-ggsave(path = "images", filename = "battelground_covid.png", height = 6, width = 10)
+ggsave(path = "images", filename = "battleground_covid.png", height = 6, width = 10)
 
 # Measuring Effect on Polls
 
@@ -163,8 +163,8 @@ case_trends <- dat_2 %>%
   labs(y = "Weekly Change in Polls",
        x = "Weekly New Covid Cases")
 
-covid_trends <- case_trends + death_trends
+covid_trends <- case_trends / death_trends
 
-ggsave(path = "images", filename = "covid_polls.png", height = 6, width = 10)
+ggsave(path = "images", filename = "covid_polls.png", height = 10, width = 10)
 
 
