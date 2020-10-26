@@ -87,20 +87,22 @@ dat <- covid_data %>%
 battleground_covid <- dat %>% 
   ggplot(aes(x = reorder(state, -avg_per_cap_deaths), y = avg_per_cap_deaths)) +
   geom_bar(stat = "identity", fill = "steelblue2") + 
-  labs(title = "Recent COVID-19 Deaths in Battleground States",
+  labs(title = "Battleground COVID-19 Deaths",
        x = "",
        y = "Deaths per 100,000 Since August") +
   theme_clean() +
-  geom_hline(yintercept = dat$average_deaths, lwd = 2, lty = 2, col = "indianred")
+  geom_hline(yintercept = dat$average_deaths, lwd = 2, lty = 2, col = "indianred") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 battleground_covid_cases <- dat %>% 
   ggplot(aes(x = reorder(state, -avg_per_cap_cases), y = avg_per_cap_cases)) +
   geom_bar(stat = "identity", fill = "steelblue2") + 
-  labs(title = "Recent COVID-19 Cases in Battleground States",
+  labs(title = "Battleground COVID-19 Cases",
        x = "",
        y = "Cases per 100,000 Since August") +
   theme_clean() +
-  geom_hline(yintercept = dat$average_cases, lwd = 2, lty = 2, col = "indianred")
+  geom_hline(yintercept = dat$average_cases, lwd = 2, lty = 2, col = "indianred") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 battleground_covid_graph <- battleground_covid_cases + battleground_covid
 
