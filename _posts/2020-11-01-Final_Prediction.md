@@ -9,6 +9,8 @@ In this blog post, with only two days left until election night, I will make my 
 
 This model was built using historical data dating from the 1976 to the 2016 election. The binomial logistic regression model I created relies on polling averages from the last month before the election, average presidential approval ratings from the month before the election, the incumbent status of the president, and demographic changes. Specifically, I calculated the percent change in a certain demographic group in each state over the four years between elections. For example, the "black_change" variable is the percent change in black population in a state between elections. This modeling strategy is also beneficial as it predicts the number of votes for the incumbent candidate and cannot exceed the total voting eligible population of the state. Now i will discuss the specific coefficients of this model. 
 
+![picture](../images/final_model_top.png)
+![picture](../images/final_model_bottom.png)
 
 ## Model Fitness
 
