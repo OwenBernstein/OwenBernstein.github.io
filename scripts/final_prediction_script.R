@@ -3,6 +3,7 @@
 library(tidyverse)
 library(ggplot2)
 library(lubridate)
+library(stargazer)
 library(ggthemes)
 library(patchwork)
 library(broom)
@@ -261,6 +262,10 @@ glm_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian
                
                family = binomial)
 
+stargazer(glm_mod,
+          title = "Election Model",
+          out = "../OwenBernstein.github.io/images/final_model_glm.html")
+
 # Predicting 2020
 
 demog_2020 <- subset(demog, year == 2018)
@@ -401,6 +406,12 @@ point_prediction <- tibstate_wins %>%
   group_by(winner) %>% 
   summarize(votes = sum(`2016`)) %>% 
   mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
+
+states_point_prediction <- tibstate_wins %>% 
+  group_by(state) %>% 
+  summarize(rep_vs = mean(prob)) %>% 
+  mutate(winner = ifelse(rep_vs > 0.5, "Trump", "Biden")) %>% 
+  add_row(state = "District of Columbia", rep_vs = 7, winner = "Biden")
 
 # Measuring fit of test for 1996
 
@@ -864,3 +875,25 @@ outsamp_graph <- pred_df_both %>%
   theme_clean()
   
 ggsave(path = "images", filename = "final_samp_graph.png", height = 6, width = 10)
+
+# Making 95% conf interval for Trump electoral votes
+
+trump_interval <- predict_ec %>% 
+  filter(winner == "republican") %>% 
+  pull(votes) %>% 
+  quantile(probs = c(0.025, 0.975))
+
+# Point prediction states
+
+states_point_prediction$state <- state.name[match(states_point_prediction$state, state.abb)]
+states_point_prediction$state[51] <- "District of Columbia"
+
+statebin_map_2 <- states_point_prediction %>% 
+  ggplot(aes(state = state, fill = fct_relevel(winner, "Biden", "Trump"))) +
+  geom_statebins() +
+  theme_statebins() +
+  labs(title = "2020 Presidential Election Prediction Map",
+       fill = "") +
+  scale_fill_manual(values=c("steelblue2", "indianred"), breaks = c("Biden", "Trump"))
+
+ggsave(path = "images", filename = "final_prediction_map.png", height = 6, width = 10)
