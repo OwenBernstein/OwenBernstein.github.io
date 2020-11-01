@@ -403,8 +403,6 @@ polls_sd$state <- state.abb[match(polls_sd$state, state.name)]
 # Measuring fit of test
 
 output_2 <- tibble()
-tib_2 <- tibble()
-
 
 for(y in unique(mod_dat$year)) {
   
@@ -431,37 +429,9 @@ for(y in unique(mod_dat$year)) {
     
     inc_vs <- sim_inc_votes/year_state_inc$voters
     
-    vec <- tibble(state = s, year = y, prob = inc_vs[1])
-    tib_2 <- tib_2 %>%
-        bind_rows(vec)
+    tib <- tibble(state = s, year = y, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 0))
+    
+    output_2 <- output_2 %>% bind_rows(tib)
   }
   
-  
 }
-  
-
-
-year_inc <- subset(mod_dat, subset = year == 2000)
-
-year_state_inc <- subset(year_inc, subset = state == "AK")
-
-true_inc <- year_state_inc %>% 
-  pull(inc_vote)
-
-glm_mod_dat <- mod_dat %>% 
-  filter(year != 2000 & state != "AK")
-
-out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
-                      age3045_change + age4565_change + age65_change, glm_mod_dat,
-                    
-                    family = binomial)
-
-pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
-
-sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
-
-nest(tib_2)
-
-tib_2 %>% 
-  group_by(year) %>% 
-  nest()
