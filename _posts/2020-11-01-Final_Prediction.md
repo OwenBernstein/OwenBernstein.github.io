@@ -12,6 +12,8 @@ This model was built using historical data dating from each presidential electio
 ![picture](../images/final_model_top.png)
 ![picture](../images/final_model_bottom.png)
 
+As seen above, each variable in this model is statistically significant. **The coefficients can be interpreted as the marginal increase in the odds of a voter turning out to vote for the incumbent party given a unit increase in the given variable.** For example, the coefficient on avg_poll, 0.049, means that a one point increase in average polling for the incumbent in the month before the election correlates with a 4.9% increase in the odds of a voter turning out to vote for the incumbent. **Using this interpretation for the other variables, an increase in approval rating and the percent of a population that is Asian, Hispanic, or over 65 also leads to an increase in the odds of a voter turning out for the incumbent. On the other hand, an increase in Black, female, or young population decreases the odds of a voter turning out for the incumbent.** Finally, if the incumbent party is Republican, the likelihood of a voter turning out for the incumbent decreases. 
+
 ## Model Fitness
 
 ![picture](../images/final_samp_graph.png)
