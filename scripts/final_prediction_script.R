@@ -253,86 +253,13 @@ mod_dat <- bind_rows(change_data, change_data_2) %>%
   arrange(state) %>% 
   mutate(voters = D + R)
 
+
 # making glm
 
 glm_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
                  age3045_change + age4565_change + age65_change, mod_dat,
                
                family = binomial)
-
-# Predicting states
-
-output <- tibble()
-tib <- tibble()
-n <- 10000
-
-for(s in unique(newdata$state)) {
-  
-  state_dat <- newdata %>% 
-    filter(state == s)
-  
-  state_dat_2 <- mod_dat %>% 
-    filter(state == s) %>% 
-    filter(year == 2016)
-  
-  state_dat_3 <- polls_sd %>% 
-    filter(state == s) %>% 
-    pull(sd)
-  
-  prob_vote <- predict(glm_mod, newdata = state_dat, type="response")[[1]]
-  
-  sim_inc_votes <- rbinom(n = n, size = state_dat_2$voters, prob = rnorm(n = n, mean = prob_vote, sd = (state_dat_3/100)))
-  
-  inc_vs <- sim_inc_votes/state_dat_2$voters
-  
-  for(i in 1:n){
-    vec <- tibble(state = s, prob = inc_vs[i])
-    tib <- tib %>%
-      bind_rows(vec)
-  }
-  vector <- tibble(state = s, sims = list(inc_vs))
-  
-  output <- output %>%
-    bind_rows(vector)
-  
-}
-
-
-tibstate_wins <- tib %>% 
-  mutate(mod = rep(1:n, times = 50)) %>% 
-  group_by(state) %>% 
-  mutate(winner = ifelse(prob > 0.5, "republican", "democrat"))
-
-predict_ec <- tibstate_wins %>%
-  left_join(ec, by = c("state" = "State")) %>% 
-  select(state, prob, mod, winner, `2016`) %>% 
-  group_by(mod, winner) %>%
-  summarise(votes = sum(`2016`)) %>% 
-  mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
-
-
-college_votes <- predict_ec %>% 
-  ggplot(aes(x = votes, fill = winner)) +
-  geom_histogram(position = "identity", alpha = c(0.6), bins = 38) +
-  scale_fill_manual(values=c("steelblue2", "indianred"), name = "", labels = c("Democrat", "Republican")) +
-  labs(title = "10,000 Electoral College Simulations", x = "Electoral Votes", y = "") +
-  theme_clean() +
-  geom_vline(xintercept = 270, lty = 2, lwd = 1.3)
-
-biden_win_perc <- predict_ec %>% 
-  group_by(winner) %>%
-  filter(winner == "democrat") %>% 
-  mutate(dem_win = ifelse(votes > 270, 1, 0)) %>% 
-  summarise(mean(dem_win))
-
-point_prediction <- tibstate_wins %>% 
-  left_join(ec, by = c("state" = "State")) %>% 
-  group_by(state, `2016`) %>% 
-  summarize(rep_vs = mean(prob)) %>% 
-  mutate(winner = ifelse(rep_vs > 0.5, "republican", "democrat")) %>% 
-  group_by(winner) %>% 
-  summarize(votes = sum(`2016`)) %>% 
-  mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
 
 # Predicting 2020
 
@@ -399,8 +326,83 @@ polls_sd <- polls_2020 %>%
   summarise(sd = sd(pct))
 
 polls_sd$state <- state.abb[match(polls_sd$state, state.name)]
+
+# Predicting states
+
+output <- tibble()
+tib <- tibble()
+n <- 10000
+
+for(s in unique(newdata$state)) {
   
-# Measuring fit of test
+  state_dat <- newdata %>% 
+    filter(state == s)
+  
+  state_dat_2 <- mod_dat %>% 
+    filter(state == s) %>% 
+    filter(year == 2016)
+  
+  state_dat_3 <- polls_sd %>% 
+    filter(state == s) %>% 
+    pull(sd)
+  
+  prob_vote <- predict(glm_mod, newdata = state_dat, type="response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = n, size = state_dat_2$voters, prob = rnorm(n = n, mean = prob_vote, sd = (state_dat_3/100)))
+  
+  inc_vs <- sim_inc_votes/state_dat_2$voters
+  
+  for(i in 1:n){
+    vec <- tibble(state = s, prob = inc_vs[i])
+    tib <- tib %>%
+      bind_rows(vec)
+  }
+  vector <- tibble(state = s, sims = list(inc_vs))
+  
+  output <- output %>%
+    bind_rows(vector)
+  
+}
+
+
+tibstate_wins <- tib %>% 
+  mutate(mod = rep(1:n, times = 50)) %>% 
+  group_by(state) %>% 
+  mutate(winner = ifelse(prob > 0.5, "republican", "democrat"))
+
+predict_ec <- tibstate_wins %>%
+  left_join(ec, by = c("state" = "State")) %>% 
+  select(state, prob, mod, winner, `2016`) %>% 
+  group_by(mod, winner) %>%
+  summarise(votes = sum(`2016`)) %>% 
+  mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
+
+college_votes <- predict_ec %>% 
+  ggplot(aes(x = votes, fill = winner)) +
+  geom_histogram(position = "identity", alpha = c(0.6), bins = 38) +
+  scale_fill_manual(values=c("steelblue2", "indianred"), name = "", labels = c("Democrat", "Republican")) +
+  labs(title = "10,000 Electoral College Simulations", x = "Electoral Votes", y = "Simulations") +
+  theme_clean() +
+  geom_vline(xintercept = 270, lty = 2, lwd = 1.3)
+
+ggsave(path = "images", filename = "final_predict.png", height = 6, width = 10)
+
+biden_win_perc <- predict_ec %>% 
+  group_by(winner) %>%
+  filter(winner == "democrat") %>% 
+  mutate(dem_win = ifelse(votes > 270, 1, 0)) %>% 
+  summarise(mean(dem_win))
+
+point_prediction <- tibstate_wins %>% 
+  left_join(ec, by = c("state" = "State")) %>% 
+  group_by(state, `2016`) %>% 
+  summarize(rep_vs = mean(prob)) %>% 
+  mutate(winner = ifelse(rep_vs > 0.5, "republican", "democrat")) %>% 
+  group_by(winner) %>% 
+  summarize(votes = sum(`2016`)) %>% 
+  mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
+
+# Measuring fit of test for 1996
 
 output_2 <- tibble()
 
@@ -429,9 +431,436 @@ for(y in unique(mod_dat$year)) {
     
     inc_vs <- sim_inc_votes/year_state_inc$voters
     
-    tib <- tibble(state = s, year = y, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 0))
+    tib <- tibble(state = s, year = y, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                       ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
     
     output_2 <- output_2 %>% bind_rows(tib)
   }
   
 }
+
+cor_96 <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2000
+
+mod_dat_2 <- na.omit(mod_dat) %>% 
+  filter(year == 2000)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_2$state)) {
+    
+    year_state_inc <- subset(mod_dat_2, subset = state == s)
+    
+    true_inc <- year_state_inc %>% 
+      pull(inc_vote)
+    
+    glm_mod_dat <- mod_dat %>% 
+      filter(year != 2000, state != s)
+    
+    out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                          age3045_change + age4565_change + age65_change, glm_mod_dat,
+                        
+                        family = binomial)
+    
+    pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+    
+    sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+    
+    inc_vs <- sim_inc_votes/year_state_inc$voters
+    
+    tib <- tibble(state = s, year = 2000, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                       ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+    
+    output_2 <- output_2 %>% bind_rows(tib)
+  }
+
+cor_00 <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2004
+
+mod_dat_3 <- na.omit(mod_dat) %>% 
+  filter(year == 2004)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_3$state)) {
+  
+  year_state_inc <- subset(mod_dat_3, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat %>% 
+    filter(year != 2004, state != s)
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2004, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_04 <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2008
+
+mod_dat_4 <- na.omit(mod_dat) %>% 
+  filter(year == 2008)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_4$state)) {
+  
+  year_state_inc <- subset(mod_dat_4, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat %>% 
+    filter(year != 2008, state != s)
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2008, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_08 <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2012
+
+mod_dat_5 <- na.omit(mod_dat) %>% 
+  filter(year == 2012)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_5$state)) {
+  
+  year_state_inc <- subset(mod_dat_5, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat %>% 
+    filter(year != 2012, state != s)
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2012, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_12 <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2016
+
+mod_dat_6 <- na.omit(mod_dat) %>% 
+  filter(year == 2016)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_6$state)) {
+  
+  year_state_inc <- subset(mod_dat_6, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat %>% 
+    filter(year != 2016, state != s)
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2016, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_16 <- mean(output_2$winner, na.rm = T)
+
+# Total correct state prediction rate
+
+pred_df <- data.frame(type = "Out of Sample", year = c(1996, 2000, 2004, 2008, 2012, 2016), correct_perc = c(cor_96, cor_00, cor_04, cor_08, cor_12, cor_16))
+
+####
+# Testing in sample fitness
+###
+
+
+# Measuring fit of test for 1996
+
+output_2 <- tibble()
+
+for(y in unique(mod_dat$year)) {
+  
+  year_inc <- subset(mod_dat, subset = year == y)
+  
+  for(s in unique(mod_dat$state)) {
+    
+    year_state_inc <- subset(year_inc, subset = state == s)
+    
+    true_inc <- year_state_inc %>% 
+      pull(inc_vote)
+    
+    glm_mod_dat <- mod_dat
+    
+    out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                          age3045_change + age4565_change + age65_change, glm_mod_dat,
+                        
+                        family = binomial)
+    
+    pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+    
+    sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+    
+    inc_vs <- sim_inc_votes/year_state_inc$voters
+    
+    tib <- tibble(state = s, year = y, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                       ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+    
+    output_2 <- output_2 %>% bind_rows(tib)
+  }
+  
+}
+
+cor_96_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2000
+
+mod_dat_2 <- na.omit(mod_dat) %>% 
+  filter(year == 2000)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_2$state)) {
+  
+  year_state_inc <- subset(mod_dat_2, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2000, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_00_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2004
+
+mod_dat_3 <- na.omit(mod_dat) %>% 
+  filter(year == 2004)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_3$state)) {
+  
+  year_state_inc <- subset(mod_dat_3, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2004, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_04_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2008
+
+mod_dat_4 <- na.omit(mod_dat) %>% 
+  filter(year == 2008)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_4$state)) {
+  
+  year_state_inc <- subset(mod_dat_4, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2008, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_08_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2012
+
+mod_dat_5 <- na.omit(mod_dat) %>% 
+  filter(year == 2012)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_5$state)) {
+  
+  year_state_inc <- subset(mod_dat_5, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2012, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_12_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Measuring fit for 2016
+
+mod_dat_6 <- na.omit(mod_dat) %>% 
+  filter(year == 2016)
+
+output_2 <- tibble()
+
+for(s in unique(mod_dat_6$state)) {
+  
+  year_state_inc <- subset(mod_dat_6, subset = state == s)
+  
+  true_inc <- year_state_inc %>% 
+    pull(inc_vote)
+  
+  glm_mod_dat <- mod_dat
+  
+  out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                        age3045_change + age4565_change + age65_change, glm_mod_dat,
+                      
+                      family = binomial)
+  
+  pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+  
+  sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+  
+  inc_vs <- sim_inc_votes/year_state_inc$voters
+  
+  tib <- tibble(state = s, year = 2016, winner = ifelse(inc_vs > 0.5 & (true_inc / year_state_inc$voters) > 0.5, 1, 
+                                                        ifelse(inc_vs < 0.5 & (true_inc / year_state_inc$voters) < 0.5, 1, 0)))
+  
+  output_2 <- output_2 %>% bind_rows(tib)
+}
+
+cor_16_in_samp <- mean(output_2$winner, na.rm = T)
+
+# Total correct state prediction rate
+
+pred_df_in_samp <- data.frame(type = "In Sample", year = c(1996, 2000, 2004, 2008, 2012, 2016), correct_perc = c(cor_96_in_samp, cor_00_in_samp, cor_04_in_samp,
+                                                                                     cor_08_in_samp, cor_12_in_samp, cor_16_in_samp))
+
+pred_df_both <- pred_df %>% 
+  bind_rows(pred_df_in_samp)
+
+outsamp_graph <- pred_df_both %>% 
+  ggplot(aes(x = as.factor(year), y = correct_perc, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(y = "States Predicted Correctly (%)", x = "", title = "Out of Sample Classification Accuracy") +
+  scale_fill_manual(values = c("steelblue2", "indianred"), name = "Forecast Type") +
+  coord_flip() +
+  geom_hline(yintercept = mean(pred_df$correct_perc), lty = 2, lwd = 1.3, color = "red") +
+  geom_hline(yintercept = mean(pred_df_in_samp$correct_perc), lty = 2, lwd = 1.3, color = "blue") +
+  annotate("text", label = "Avg\n (0.8)", x = 6, y = 0.85, size = 4) +
+  annotate("text", label = "Avg\n (0.9)", x = 6, y = 0.95, size = 4) +
+  theme_clean()
+  
+ggsave(path = "images", filename = "final_samp_graph.png", height = 6, width = 10)
