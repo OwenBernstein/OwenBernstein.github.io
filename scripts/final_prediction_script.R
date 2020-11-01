@@ -320,6 +320,20 @@ college_votes <- predict_ec %>%
   theme_clean() +
   geom_vline(xintercept = 270, lty = 2, lwd = 1.3)
 
+biden_win_perc <- predict_ec %>% 
+  group_by(winner) %>%
+  filter(winner == "democrat") %>% 
+  mutate(dem_win = ifelse(votes > 270, 1, 0)) %>% 
+  summarise(mean(dem_win))
+
+point_prediction <- tibstate_wins %>% 
+  left_join(ec, by = c("state" = "State")) %>% 
+  group_by(state, `2016`) %>% 
+  summarize(rep_vs = mean(prob)) %>% 
+  mutate(winner = ifelse(rep_vs > 0.5, "republican", "democrat")) %>% 
+  group_by(winner) %>% 
+  summarize(votes = sum(`2016`)) %>% 
+  mutate(votes = ifelse(winner == "democrat", votes + 3, votes))
 
 # Predicting 2020
 
@@ -387,26 +401,7 @@ polls_sd <- polls_2020 %>%
 
 polls_sd$state <- state.abb[match(polls_sd$state, state.name)]
   
-state_dat <- newdata %>% 
-  filter(state == "AL")
+# Measuring fit of test
 
-state_dat_2 <- mod_dat %>% 
-  filter(state == "AL") %>% 
-  filter(year == 2016)
-
-state_dat_3 <- polls_sd %>% 
-  filter(state == "AL") %>% 
-  pull(sd)
-
-prob_vote_mean <- predict(glm_mod, newdata = state_dat, type="response")[[1]]
-
-prob_vote <- rnorm(n = 1, mean = prob_vote, sd = (state_dat_3/100))
-
-n <- 10
-
-sim_inc_votes <- rbinom(n = n, size = state_dat_2$voters, prob = rnorm(n = n, mean = prob_vote, sd = (state_dat_3/100)))
-sim_inc_votes_norm <- rbinom(n = n, size = state_dat_2$voters, prob = prob_vote)
-
-inc_vs <- sim_inc_votes/state_dat_2$voters
 
 
