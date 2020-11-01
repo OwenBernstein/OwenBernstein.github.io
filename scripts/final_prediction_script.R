@@ -286,7 +286,6 @@ for(s in unique(newdata$state)) {
   inc_vs <- sim_inc_votes/state_dat_2$voters
   
   for(i in 1:n){
-    mod <- 
     vec <- tibble(state = s, prob = inc_vs[i])
     tib <- tib %>%
       bind_rows(vec)
@@ -403,5 +402,66 @@ polls_sd$state <- state.abb[match(polls_sd$state, state.name)]
   
 # Measuring fit of test
 
+output_2 <- tibble()
+tib_2 <- tibble()
 
 
+for(y in unique(mod_dat$year)) {
+  
+  year_inc <- subset(mod_dat, subset = year == y)
+  
+  for(s in unique(mod_dat$state)) {
+    
+    year_state_inc <- subset(year_inc, subset = state == s)
+    
+    true_inc <- year_state_inc %>% 
+      pull(inc_vote)
+    
+    glm_mod_dat <- mod_dat %>% 
+      filter(year != y & state != s)
+    
+    out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                          age3045_change + age4565_change + age65_change, glm_mod_dat,
+                        
+                        family = binomial)
+    
+    pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+    
+    sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+    
+    inc_vs <- sim_inc_votes/year_state_inc$voters
+    
+    vec <- tibble(state = s, year = y, prob = inc_vs[1])
+    tib_2 <- tib_2 %>%
+        bind_rows(vec)
+  }
+  
+  
+}
+  
+
+
+year_inc <- subset(mod_dat, subset = year == 2000)
+
+year_state_inc <- subset(year_inc, subset = state == "AK")
+
+true_inc <- year_state_inc %>% 
+  pull(inc_vote)
+
+glm_mod_dat <- mod_dat %>% 
+  filter(year != 2000 & state != "AK")
+
+out_samp_mod <- glm(cbind(inc_vote, voters-inc_vote) ~ avg_poll + avg_approve + asian_change + black_change + hispanic_change + female_change + party +
+                      age3045_change + age4565_change + age65_change, glm_mod_dat,
+                    
+                    family = binomial)
+
+pred_inc_vote <- predict(out_samp_mod, newdata = year_state_inc, type = "response")[[1]]
+
+sim_inc_votes <- rbinom(n = 1, size = year_state_inc$voters, prob = pred_inc_vote)
+
+nest(tib_2)
+
+tib_2 %>% 
+  group_by(year) %>% 
+  nest()
