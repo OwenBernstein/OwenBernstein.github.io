@@ -7,7 +7,7 @@ In this blog post, with only two days left until election night, I will make my 
 
 ## Model Discussion
 
-This model was built using historical data dating from each presidential election from 1976 to 2016. The binomial logistic regression model I created relies on **polling averages from the last month before the election, average presidential approval ratings from the month before the election, the incumbent status of the president, and demographic changes.** Specifically, I calculated the percent change in a certain demographic group in each state over the four years between elections. For example, the "black_change" variable is the percent change in black population in a state between elections. **This modeling strategy is also beneficial as it predicts the number of votes for the incumbent candidate and cannot exceed the total voting eligible population of the state.** Now i will discuss the specific coefficients of this model. 
+This model was built using historical data dating from each presidential election from 1976 to 2016. The binomial logistic regression model I created relies on **polling averages from the last month before the election, average presidential approval ratings from the month before the election, the incumbent status of the president, and demographic changes.** Specifically, I calculated the percent change in a certain demographic group in each state over the four years between elections. For example, the "black_change" variable is the percent change in Black population in a state between elections. **This modeling strategy is also beneficial as it predicts the number of votes for the incumbent candidate and cannot exceed the total voting eligible population of the state.** Now I will discuss the specific coefficients of this model. 
 
 ![picture](../images/final_model_top.png)
 ![picture](../images/final_model_bottom.png)
@@ -26,10 +26,10 @@ Pictured below are the results of 10,000 election simulations. When predicting v
 
 ![picture](../images/final_predict.png)
 
-**Of these 10,000 simulations, Biden achieved 270 electoral college votes in 78%. In the average prediction, Biden received 273 electoral votes,** and Trump received 265. Pictured below is the electoral map of the average prediction from the 10,000 simulations. 
+**Biden achieved 270 electoral college votes in 78% of these 10,000 simulations. In the average prediction, Biden received 273 electoral votes,** and Trump received 265. Pictured below is the electoral map of the average prediction from the 10,000 simulations. 
 
 ![picture](../images/final_prediction_map.png)
 
-In this prediction, Trump wins the swing states of Arizona, Florida, Georgia, and North Carolina while Biden wins Pennsylvania. In the simulations, Trump on average won 50.1% of the two party vote share. **In Florida, Georgia and North Carolina, Trump won by less than 2% on average.** This suggests that while the average result predicts a narrow Biden victory, Trump has a high chance to lose at least one of these swing states. **Ultimately, my election model predicts that Biden will win the election 78% of the time, and on average wins a narrow 273-265 victory in the electoral college.** 
+In this prediction, Trump wins the swing states of Arizona, Florida, Georgia, and North Carolina while Biden wins Pennsylvania. In the simulations, Trump on average won 50.1% of the Arizona two party vote share. **In Florida, Georgia and North Carolina, Trump won by less than 2% on average.** This suggests that while the average result predicts a narrow Biden victory, Trump has a high chance to lose at least one of these swing states. **Ultimately, my election model predicts that Biden will win the election 78% of the time, and on average wins a narrow 273-265 victory in the electoral college.** 
 
 
