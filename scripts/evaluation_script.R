@@ -83,7 +83,7 @@ mse <- states_point_prediction %>%
   summarize(rmse = mean(error) * 100)
 
 
-measures <- c("National Electoral Vote Total", "RMSE (state, pv2p)", "MSE (state, pv2p", "Classification Accuracy", "States Missed")
+measures <- c("National Electoral Vote Total", "RMSE (state, pv2p)", "MSE (state, pv2p)", "Classification Accuracy", "States Missed")
 my_model <- c("33", "1.68", "-0.43", "94", "AZ, GA, NV")
 five_thirty_eight <- c("-42", "3.02", "-2.44", "96", "NC, FL")
 economist <- c("-50", "2.80", "-2.33", "96", "NC, FL")
