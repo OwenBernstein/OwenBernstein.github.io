@@ -27,3 +27,17 @@ Looking at this graph it appears that my model was fairly accurate at predicting
 My model, in contrast to the other models, **overestimated Trump's electoral vote count.** The root square mean error and mean square error of my model are both smaller than either of the other models' suggesting that **in general my state level two party vote shares were more accurate than other models.** However, the classification accuracy of my model was less than the others as **I incorrectly predicted three states rather than two.** Interestingly, despite overestimating Trump's electoral college votes, on average I underestimated his two party vote share as seen in the negative MSE value. This may be because the states that I incorrectly predicted had vote shares very close to 50%, while other states had larger errors in favor of Biden.  
 
 ## What Went Wrong?
+
+Overall, I am very satisfied with my model. **Only two states, New York and Rhode Island, incorrectly predicted the two party vote share by over 5%,** and I expect that as votes in New York get counted it will get closer to my prediction. However, I still hope to understand where my model went wrong, **especially in heavily democratic states where my prediction errors were larger.** 
+
+### Sources of error
+
+**I expect that my model relied too heavily on polling.** This may be especially true in heavily democratic states where polling was infrequent. For this reason my model might be relying too heavily on only a few results. For example, **my model predicted drastically different vote shares for New Jersey, Colorado, and New Mexico despite these states having similar election results.** This error is probably a result of polling. In the month before the election these states were polling at 36%, 40%, and 45% for Trump respectively. 
+
+**Suggested reasons for the inaccuracy of polling include response differences by demographic, and "shy Trump voters."** In the first of these theories it is argued that polling does not do enough to capture a representative sample. David Shor, a data analyst, argued that poll respondents are unusual as they are part of a subset of the population that are willing to answer the phone and stay on and talk to pollsters. **Certain groups may be more likely to do this than others which would generate polling errors.** The second theory argues that because of social stigmas, Trump voters are more likely to lie about their voting preferences to pollsters. **This would generate a second source of error and systematically underestimate Trump's vote share.** I believe that both of these polling errors, combined with my models over-dependence on polls, could have caused the errors seen in my predictions. 
+
+### Testing these sources of error
+
+## Improving MY Model
+
+
