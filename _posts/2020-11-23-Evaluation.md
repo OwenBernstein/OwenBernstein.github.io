@@ -24,3 +24,6 @@ Looking at this graph it appears that my model was fairly accurate at predicting
 
 ![picture](../images/eval_measures_gt.png)
 
+My model, in contrast to the other models, **overestimated Trump's electoral vote count.** The root square mean error and mean square error of my model are both smaller than either of the other models' suggesting that **in general my state level two party vote shares were more accurate than other models.** However, the classification accuracy of my model was less than the others as **I incorrectly predicted three states rather than two.** Interestingly, despite overestimating Trump's electoral college votes, on average I underestimated his two party vote share as seen in the negative MSE value. This may be because the states that I incorrectly predicted had vote shares very close to 50%, while other states had larger errors in favor of Biden.  
+
+## What Went Wrong?
