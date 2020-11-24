@@ -28,16 +28,17 @@ My model, in contrast to the other models, **overestimated Trump's electoral vot
 
 ## What Went Wrong?
 
-Overall, I am very satisfied with my model. **Only two states, New York and Rhode Island, incorrectly predicted the two party vote share by over 5%,** and I expect that as votes in New York get counted it will get closer to my prediction. However, I still hope to understand where my model went wrong, **especially in heavily democratic states where my prediction errors were larger.** 
-
 ### Sources of error
 
 **I expect that my model relied too heavily on polling.** This may be especially true in heavily democratic states where polling was infrequent. For this reason my model might be relying too heavily on only a few results. For example, **my model predicted drastically different vote shares for New Jersey, Colorado, and New Mexico despite these states having similar election results.** This error is probably a result of polling. In the month before the election these states were polling at 36%, 40%, and 45% for Trump respectively. 
 
 **Suggested reasons for the inaccuracy of polling include response differences by demographic, and "shy Trump voters."** In the first of these theories it is argued that polling does not do enough to capture a representative sample. David Shor, a data analyst, argued that poll respondents are unusual as they are part of a subset of the population that are willing to answer the phone and stay on and talk to pollsters. **Certain groups may be more likely to do this than others which would generate polling errors.** The second theory argues that because of social stigmas, Trump voters are more likely to lie about their voting preferences to pollsters. **This would generate a second source of error and systematically underestimate Trump's vote share.** I believe that both of these polling errors, combined with my models over-dependence on polls, could have caused the errors seen in my predictions. 
 
-### Testing these sources of error
+### Testing sources of error
 
-## Improving MY Model
+If I were to conduct a test to evaluate whether or not polling errors led to my model's prediction errors, I would mainly look at two factors. **1) The number of polls in the month before the election in each state and 2) the polling error.** If my model performed significantly worse in states where there were very few polls in the month leading up to the election than in states with many polls, then I could confirm that this is a source of error. Secondly, if my model performed significantly worse in states where polls also performed poorly, than it would be likely that polling error led to my model's error. 
 
+## Improving My Model
+
+Overall, I am very satisfied with my model. **Only two states, New York and Rhode Island, incorrectly predicted the two party vote share by over 5%,** and I expect that as votes in New York get counted it will get closer to my prediction. However, I still think that my model could have been improved. I do not think that I would  remove any independent variables I did choose to include, but **I would add 2016 vote share to my model and change the weighting of these variables.** Specifically, I think that if I relied less heavily on polling in states where there were very few polls and more heavily on 2016 vote share, I may have had a more accurate model. 
 
