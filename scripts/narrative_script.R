@@ -13,6 +13,7 @@ library(tidytext)
 library(dotwhisker)
 library(ggthemes)
 library(webshot)
+library(patchwork)
 
 # Loading data
 
@@ -33,10 +34,11 @@ speeches <- bind_rows(clinton_speeches, trump_speeches,
 
 tidy_speeches <- speeches %>% 
   clean_names() %>% 
-  filter(speaker == "Donald Trump" | speaker == "Hilary Clinton" |
+  filter(speaker == "Donald Trump" | speaker == "Hillary Clinton" |
            speaker == "Bernie Sanders" | speaker == "Mitt Romney" |
            speaker == "Barack Obama" | speaker == "John McCain" |
            speaker == "Joe Biden")
+
 
 # Making corpus
 
@@ -56,7 +58,7 @@ speech_toks <- tokens(speech_corpus,
                           "(laughing)", "joe","biden","donald","trump",
                           "president","kamala","harris", "john", "mccain", "romney",
                           "mitt", "governor", "senator", "bernie", "sanders", "barack", 
-                          "obama", "hilary", "clinton")) %>%
+                          "obama", "hillary", "clinton")) %>%
   tokens_remove(pattern=stopwords("en")) %>%
   tokens_select(min_nchar=3)
 
@@ -66,6 +68,8 @@ all_words_cloud <- textplot_wordcloud(speech_dfm, color = c("red", "orange",
                                                             "yellowgreen", "green",
                                                             "blue", "purple", "violet"),
                                       comparison = T)
+
+ggsave(path = "images", filename = "all_words_cloud.png", height = 6, width = 10)
 
 # Making content categories by word
 
@@ -107,8 +111,14 @@ content_words <- dfm_select(speech_dfm, pattern = content_dict, selection = "kee
 trump_keyness <- textstat_keyness(content_words, target = "Donald Trump")
 trump_relative <- textplot_keyness(trump_keyness)
 
+ggsave(path = "images", filename = "trump_relative.png", height = 6, width = 10)
+
 biden_keyness <- textstat_keyness(content_words, target = "Joe Biden")
 biden_relative <- textplot_keyness(biden_keyness)
+
+ggsave(path = "images", filename = "biden_relative.png", height = 6, width = 10)
+
+
 
 # Making content categories by grouping
 
@@ -123,10 +133,57 @@ content_df <- convert(content, to = "data.frame") %>%
        progressive_percent = progressive / total * 100,
        conservatism_percent = conservative / total * 100)
 
-populism_box <- content_df %>% 
-  ggplot(., aes(doc_id, populism_percent)) +
-  geom_bar(stat = "identity") + 
-  labs(title = "Populist Language in Speeches by Candidate",
-       x = "Candidate", y = "Percent Populist Language") +
-  theme_minimal() +
-  theme(axis.line = element_line())
+populism_bar <- content_df %>% 
+  ggplot(aes(x = reorder(doc_id, -populism_percent), populism_percent)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Populist Language",
+       x = "", y = "Percent") +
+  theme_clean() +
+  theme(axis.line = element_line()) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = mean(content_df$populism_percent), color = "indianred", lty = 2, lwd = 1.3)
+
+environment_bar <- content_df %>% 
+  ggplot(aes(x = reorder(doc_id, -environment_percent), environment_percent)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Language Relating to the Environment",
+       x = "", y = "Percent") +
+  theme_clean() +
+  theme(axis.line = element_line()) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = mean(content_df$environment_percent), color = "indianred", lty = 2, lwd = 1.3)
+
+immigration_bar <- content_df %>% 
+  ggplot(aes(x = reorder(doc_id, -immigration_percent), immigration_percent)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Language Relating to Immigration",
+       x = "", y = "Percent") +
+  theme_clean() +
+  theme(axis.line = element_line()) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = mean(content_df$immigration_percent), color = "indianred", lty = 2, lwd = 1.3)
+
+progressive_bar <- content_df %>% 
+  ggplot(aes(x = reorder(doc_id, -progressive_percent), progressive_percent)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Progressive Language",
+       x = "", y = "Percent") +
+  theme_clean() +
+  theme(axis.line = element_line()) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = mean(content_df$progressive_percent), color = "indianred", lty = 2, lwd = 1.3)
+
+conservative_bar <- content_df %>% 
+  ggplot(aes(x = reorder(doc_id, -conservatism_percent), conservatism_percent)) +
+  geom_bar(stat = "identity", fill = "steelblue2") + 
+  labs(title = "Conservative Language",
+       x = "", y = "Percent") +
+  theme_clean() +
+  theme(axis.line = element_line()) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = mean(content_df$conservatism_percent), color = "indianred", lty = 2, lwd = 1.3)
+
+content_cat_bars <- (populism_bar + progressive_bar + conservative_bar) / (immigration_bar + environment_bar)
+
+ggsave(path = "images", filename = "content_cat_bars.png", height = 6, width = 10)
+
