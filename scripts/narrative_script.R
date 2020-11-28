@@ -35,3 +35,5 @@ tidy_speeches <- speeches %>%
            speaker == "Bernie Sanders" | speaker == "Mitt Romney" |
            speaker == "Barack Obama" | speaker == "John McCain" |
            speaker == "Joe Biden")
+
+speech_corpus <- corpus(tidy_speeches, text_field = "text")
