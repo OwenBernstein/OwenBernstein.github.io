@@ -251,7 +251,7 @@ time_toks <- tokens(time_corpus,
 
 time_dfm <- dfm(time_toks, groups = c("date"))
 
-textplot_wordcloud(time_dfm, comparison = T, min_count = 5)
+trump_months_wordcloud <- textplot_wordcloud(time_dfm, comparison = T, min_count = 15)
 
 
 
