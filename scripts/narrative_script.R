@@ -236,7 +236,6 @@ time_toks <- tokens(time_corpus,
                     remove_symbols = TRUE,
                     remove_numbers = TRUE,
                     remove_url = TRUE) %>% 
-  tokens_wordstem() %>% 
   tokens_tolower() %>%
   tokens_remove(pattern= c("applause", "inaudible","cheers", "laughing",
                            "[applause]", "[inaudible]", "[cheers]",
@@ -252,6 +251,37 @@ time_toks <- tokens(time_corpus,
 time_dfm <- dfm(time_toks, groups = c("date"))
 
 trump_months_wordcloud <- textplot_wordcloud(time_dfm, comparison = T, min_count = 15)
+
+# Most used phrases by month Biden
+
+speeches_time <- tidy_speeches %>% 
+  filter(speaker == "Joe Biden") %>% 
+  filter(date > as.Date("2018-01-01")) %>% 
+  mutate(date = floor_date(date, "bimonth"))
+
+time_corpus <- corpus(speeches_time, text_field = "text")
+
+time_toks <- tokens(time_corpus, 
+                    remove_punct = TRUE,
+                    remove_symbols = TRUE,
+                    remove_numbers = TRUE,
+                    remove_url = TRUE) %>% 
+  tokens_tolower() %>%
+  tokens_remove(pattern= c("applause", "inaudible","cheers", "laughing",
+                           "[applause]", "[inaudible]", "[cheers]",
+                           "[laughing]", "(applause)", "(inaudible)","(cheers)",
+                           "(laughing)", "joe","biden","donald","trump",
+                           "president","kamala","harris", "john", "mccain", "romney",
+                           "mitt", "governor", "senator", "bernie", "sanders", "barack", 
+                           "obama", "hillary", "clinton")) %>%
+  tokens_remove(pattern=stopwords("en")) %>%
+  tokens_select(min_nchar=3) %>% 
+  tokens_ngrams(n = 2)
+
+time_dfm <- dfm(time_toks, groups = c("date"))
+
+biden_months_wordcloud <- textplot_wordcloud(time_dfm, comparison = T, min_count = 15)
+
 
 
 
