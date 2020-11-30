@@ -9,3 +9,7 @@ title: Campaign Narratives - Nov. 1, 2020
 ![picture](../images/trump_relative.png)
 
 ![picture](../images/content_cat_bars.png)
+
+![picture](../images/trump_recent_relative.png)
+
+[picture](../images/trump_months_wordcloud.png)
