@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Campaign Narratives - Nov. 1, 2020
+title: Campaign Narratives - Nov. 29, 2020
 ---
 
 In this week's blog post I will be exploring the language used by presidential candidates, especially Trump and Biden. I will examine what words each candidate used the most and how Trump's and Biden's language usage changed over the course of their campaigns.  To conduct this exploration I used campaign speech transcripts from seven recent candidates. I used the quanteda r package to examine the specific words in each speech. 
