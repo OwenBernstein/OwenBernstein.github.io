@@ -20,5 +20,20 @@ If this narrative were true, that Biden was able to win the election because of 
 
 ## The Data
 
+To conduct this analysis, I collected data on vote share by county for both 2016 and 2020. I also collected demographic data from the Census Bureau from 2019. I used this data to determine the democratic win margin in each county, the change in democratic win margin from 2016 to 2019, and the percentage of each county that was white in 2019. 
+
+## Results
+
+To test this narrative, I first looked at the relationship between white vote share and democratic win margin in the 2020 election. The graph below shows a very clear correlation in which the whiter a county gets, the smaller the democratic vote share is. 
+
 ![picture](../images/vs_white_pop.png)
+
+I next wanted to see how the democratic win margin had changed from 2016 to 2020 based on the demographics of a county. The graph below shows that there was no real relationship between these two variables. In fact, the very slightly negative line of best fit shows that whiter counties in general had a smaller democratic vote share. This directly contradicts the media narrative that Joe Biden was able to win with white voters. 
+
 ![picture](../images/vote_marg_change.png)
+
+Finally, I wanted to check if the narrative held true in the Midwest states that Joe Biden was able to flip in 2020. Many of the articles mentioned in this blog post specified that Biden's message was most successful with working class, Midwestern white voters. To test this claim, I conducted the same analysis as above but limited my sample to only Wisconsin, Michigan, and Pennsylvania, states that Joe Biden flipped in 2020. Somewhat surprisingly, while Biden did perform better in these states than Clinton, there was still no relationship between white population percentage in a county and the change in vote share. 
+
+![picture](../images/midwest_vs_chng.png)
+
+Overall, it appears that the media narrative that Biden won the election due to his appeal to white voters was untrue. Biden did perform better than Clinton in many of these counties, but he did not perform better in whiter counties which would suggest that this change in vote share was motivated by white voters. Instead, Biden performed better across the board, potentially offering evidence to the claim that Biden was able to build a multiracial coalition to win the election. 
